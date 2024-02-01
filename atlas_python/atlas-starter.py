@@ -26,10 +26,7 @@ def get_client():
 
 
 client = get_client()
-# use a database named "myDatabase"
 db = client.myDatabase
-
-# use a collection named "recipes"
 my_collection = db["recipes"]
 
 recipe_documents = [
