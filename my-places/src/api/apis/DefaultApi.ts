@@ -15,10 +15,13 @@
 
 import * as runtime from '../runtime';
 import type {
+  APIKey,
   HTTPValidationError,
   Place,
 } from '../models/index';
 import {
+    APIKeyFromJSON,
+    APIKeyToJSON,
     HTTPValidationErrorFromJSON,
     HTTPValidationErrorToJSON,
     PlaceFromJSON,
@@ -116,6 +119,34 @@ export class DefaultApi extends runtime.BaseAPI {
      */
     async getAllAllGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Place>> {
         const response = await this.getAllAllGetRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Get the Google api key.
+     * Get Google Api Key
+     */
+    async getGoogleApiKeyKeysGoogleGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<APIKey>> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/keys/google`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => APIKeyFromJSON(jsonValue));
+    }
+
+    /**
+     * Get the Google api key.
+     * Get Google Api Key
+     */
+    async getGoogleApiKeyKeysGoogleGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<APIKey> {
+        const response = await this.getGoogleApiKeyKeysGoogleGetRaw(initOverrides);
         return await response.value();
     }
 

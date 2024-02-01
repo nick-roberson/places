@@ -4,13 +4,23 @@ import os
 import uuid
 
 from typing import List
-from mongo.models import Place
+from places.models import Place
 
 MONGO_URI = os.environ.get("MONGO_URI")
 
 ###################################################################
 # Utility Functions                                               #
 ###################################################################
+
+# Singleton manager class
+_MANAGER_SINGLETON = None
+
+
+def get_manager():
+    global _MANAGER_SINGLETON
+    if not _MANAGER_SINGLETON:
+        _MANAGER_SINGLETON = RestaurantManager()
+    return _MANAGER_SINGLETON
 
 
 def get_client():
@@ -43,13 +53,28 @@ class RestaurantManager:
         self.collection = get_collection(self.client, self.collection_name)
 
     ########################################################
-    # Drop All                                             #
+    # Drop                                                 #
     ########################################################
 
     def drop_all(self) -> None:
         """Drop all restaurants"""
         print(f"Dropping all from {self.collection_name}")
         self.collection.drop()
+
+    def drop_by_name(self, name: str) -> None:
+        """Drop a restaurant by name"""
+        print(f"Dropping {name} from {self.collection_name}")
+        self.collection.delete_one({"name": name})
+
+    def drop_by_place_id(self, place_id: str) -> None:
+        """Drop a restaurant by place_id"""
+        print(f"Dropping {place_id} from {self.collection_name}")
+        self.collection.delete_one({"place_id": place_id})
+
+    def drop_by_id(self, id: str) -> None:
+        """Drop a restaurant by id"""
+        print(f"Dropping {id} from {self.collection_name}")
+        self.collection.delete_one({"id": id})
 
     ########################################################
     # Insert                                               #

@@ -4,8 +4,8 @@ import json
 import sys
 import tabulate
 
-from mongo.google import seed as get_seed_data, get_restaurant_info
-from mongo.restaurant_manager import RestaurantManager
+from places.google import seed as get_seed_data, get_restaurant_info
+from places.manager import RestaurantManager
 
 app = typer.Typer()
 manager = RestaurantManager()

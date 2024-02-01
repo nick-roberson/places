@@ -2,6 +2,16 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 
+class PlaceInsertModel(BaseModel):
+    name: str
+    location: str
+    collection: Optional[str] = "personal"
+
+
+class APIKey(BaseModel):
+    key: str
+
+
 class Location(BaseModel):
     lat: float
     lng: float
@@ -51,6 +61,7 @@ class Place(BaseModel):
     # Optional fields
     price_level: Optional[int] = None
     rating: Optional[float] = None
+    collection: Optional[str] = "personal"
 
     # Processed fields
     reservation_url: Optional[str] = None

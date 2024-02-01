@@ -11,8 +11,7 @@ import os
 import logging
 import uvicorn
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter
 from fastapi import HTTPException
 from typing import List, Optional, Dict
 
@@ -20,11 +19,9 @@ from places.manager import RestaurantManager
 from places.models import Place, APIKey, PlaceInsertModel
 from places.google import get_restaurant_info
 
-
-app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"])
-
-manager = RestaurantManager()
+# Constants
+manager = None
+router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
@@ -34,11 +31,6 @@ def configure_logging():
         level=level,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
-
-
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
 
 
 @app.post("/add")
@@ -96,76 +88,3 @@ def add_many(places: List[PlaceInsertModel]) -> List[Place]:
         except Exception as e:
             logger.error(f"Could not add {place}: {e}")
     return new_places
-
-
-@app.post("/delete/many")
-def delete_many(places: List[Dict[str, str]]) -> str:
-    """Delete multiple restaurants from the database.
-
-    Args:
-        places (List[str]): List of restaurants to delete
-    """
-    logger.info(f"Deleting {len(places)} places")
-    deleted_places = []
-    for place in places:
-        try:
-            name, location = place.get("name"), place.get("location")
-            manager.drop_by_name(name=name)
-        except Exception as e:
-            logger.error(f"Could not delete {place}: {e}")
-    return "Done"
-
-
-@app.get("/all")
-def get_all() -> List[Place]:
-    """Get all restaurants."""
-    logging.info("Getting all")
-    return manager.get_all()
-
-
-@app.get("/get/{name}")
-def get_one(name: str, exact: bool = False) -> Optional[Place]:
-    """Get one restaurant by name
-
-    Args:
-        name (str): Name of the restaurant to get
-        exact (bool, optional): Exact match for name. Defaults to False.
-    """
-    logger.info(f"Getting {name}")
-    return manager.get(name=name, exact=exact)
-
-
-@app.get("/search")
-def search(
-    name: Optional[str] = None,
-    address: Optional[str] = None,
-    min_rating: Optional[float] = None,
-    exact: bool = False,
-) -> List[Place]:
-    """Search for a restaurant by name.
-
-    Args:
-        name (str, optional): Name of the restaurant to lookup. Defaults to None.
-        address (str, optional): Address of the restaurant to lookup. Defaults to None.
-        min_rating (float, optional): Minimum rating for the restaurant. Defaults to None.
-        exact (bool, optional): Exact match for name. Defaults to False.
-    """
-    if not name and not address and not min_rating:
-        logger.error("Please provide a name or address or min_rating")
-        return []
-
-    logger.info(f"Searching for {name} at {address} with min rating {min_rating}")
-    return manager.search(
-        name=name, address=address, min_rating=min_rating, exact=exact
-    )
-
-
-@app.get("/keys/google")
-def get_google_api_key() -> APIKey:
-    """Get the Google api key."""
-    return APIKey(key=os.environ.get("GOOGLE_API_KEY"))
-
-
-if __name__ == "__main__":
-    configure_logging()
-    uvicorn.run(app, host="localhost", port=8000)

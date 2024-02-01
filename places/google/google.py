@@ -3,7 +3,7 @@ import json
 import googlemaps
 
 from tqdm import tqdm
-from mongo.models import Place
+from places.models import Place
 from typing import List, Union
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")

@@ -7,4 +7,4 @@ script:
   # test-coverage will also run the tests, but does not print helpful output upon test failure.
   # So we also run the tests separately.
   - npm run test
-  - npm run test-coverage && cat coverage/lcov.info | ./node_modules/.bin/coveralls && rm -rf coverage
+  - npm run test-coverage && cat coverage/lcov.info | ./react/.bin/coveralls && rm -rf coverage

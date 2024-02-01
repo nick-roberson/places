@@ -1,5 +1,5 @@
 // Standard
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './App.css';
 
 // Third Party
@@ -20,12 +20,15 @@ import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 
+// Complex imports
 import { DataGrid, GridToolbar, GridColDef, GridEventListener} from '@mui/x-data-grid';
+import { BarChart } from '@mui/x-charts/BarChart';
 
 // My imports
-import { Configuration } from './api/runtime';
+import { Configuration } from './api';
 import { DefaultApi } from './api/apis';
 import { Place } from './api/models/Place';
+import fetchApiKey from "./components/google_api_key"
 
 // Function that will open in new tab a link from the param
 const renderDetailsButton = (params: any) => {
@@ -44,11 +47,43 @@ const renderDetailsButton = (params: any) => {
     )
 }
 
+function RenderBarChart(places: Place[], dataKey: string, chartLabel: string) {
+    if (places.length === 0) {
+        return <div>No places to display</div>;
+    }
+
+    // Filter out places with missing rating or price priceLevel
+    places = places.filter((place) => place.rating && place.priceLevel);
+
+    // Create a dataset for the bar chart
+    const dataset = places.map((place) => {
+        return {
+            name: place.name,
+            rating: place.rating,
+            userRatingsTotal: place.userRatingsTotal,
+        };
+    });
+
+    const valueFormatter = (value: number) => `${value}`;
+
+    // order bars by rating
+    return (
+        <BarChart
+          dataset={dataset}
+          xAxis={[{ scaleType: 'band', dataKey: 'name', label: 'Name' }]}
+          series={[
+            { dataKey: dataKey,  label: chartLabel, valueFormatter },
+          ]}
+        />
+    );
+}
+
 // Define the component
-const MyComponent = () => {
+const MyPlaces = () => {
 
     // Create a state to store the API client
     const [apiClient, setApiClient] = useState<DefaultApi | null>(null);
+    const [apiKey, setApiKey] = useState<string>('');
 
     // Create rows and columns for Data GridColDef
     const [places, setPlaces] = useState<Place[]>([]);
@@ -67,9 +102,7 @@ const MyComponent = () => {
         try {
             apiClient.addAddPostRaw({ name: newPlaceName, location: newPlaceLocation }).then((response) => {
                 console.log('Added place', response);
-                setNewPlaceName('');
-                setNewPlaceLocation('');
-                refreshPlaces();
+                refreshPlaces(true);
             });
         } catch (error) {
             console.error('Error adding place', error);
@@ -107,6 +140,7 @@ const MyComponent = () => {
 
     // Initialize your API client with the base URL
     useEffect(() => {
+        // Init Client 
         const configuration = new Configuration({
             basePath: "http://localhost:8000",
         });
@@ -114,10 +148,14 @@ const MyComponent = () => {
         setApiClient(api);
     }, []); // Run this effect only once
 
-    const refreshPlaces = () => {
+    const refreshPlaces = (force: boolean) => {
         // Wait until the API client is initialized
         if (!apiClient) {
             console.log('API client not initialized yet, not loading')
+            return;
+        }
+
+        if (!force && places.length > 0) {
             return;
         }
 
@@ -129,12 +167,12 @@ const MyComponent = () => {
             setColumns([
                 { field: 'name', headerName: 'Name', width: 250},
                 { field: 'businessStatus', headerName: 'Status', width: 130 },
-                { field: 'formattedAddress', headerName: 'Address', width: 600 },
-                { field: 'rating', headerName: 'Avg Rating', width: 130 },
-                { field: 'userRatingsTotal', headerName: 'Total Ratings', width: 130 },
-                { field: 'priceLevel', headerName: 'Price Level', width: 130 },
+                { field: 'formattedAddress', headerName: 'Address', width: 400 },
+                { field: 'rating', headerName: 'Avg Rating', width: 100 },
+                { field: 'userRatingsTotal', headerName: 'Total Ratings', width: 100 },
+                { field: 'priceLevel', headerName: 'Price Level', width: 100 },
                 // Add field for link our to google reservations
-                { field: 'reservationUrl', headerName: 'Reservations', width: 400, renderCell: renderDetailsButton },
+                { field: 'reservationUrl', headerName: 'Reservations', width: 200, renderCell: renderDetailsButton },
             ]);
         });
     };
@@ -147,13 +185,10 @@ const MyComponent = () => {
             return;
         }
         if (places.length > 0) {
-            console.log('Places already loaded, not loading again');
             return;
         }
-        refreshPlaces();
+        refreshPlaces(false);
     };
-
-    // Render the component
     loadPlaces();
 
     return (
@@ -221,9 +256,8 @@ const MyComponent = () => {
                     <Grid xs={12}>
                         <Input placeholder="Search by name and location here ..." onChange={(event) => updateSearch(event.target.value)} />
                     </Grid>
-
                     {/* DataGrid of all places pull from API */}
-                    <Grid xs={12}>
+                    <Grid xs={9}>
                         <DataGrid
                             onRowClick={handleEvent}
                             rows={rows}
@@ -239,10 +273,14 @@ const MyComponent = () => {
                             slots={{ toolbar: GridToolbar }}
                         />
                     </Grid>
+                    <Grid xs={3}>
+                        {RenderBarChart(rows, 'rating', 'Rating')}
+                    </Grid>
                 </Grid>
             </Box>
       </div>
+      
     );
 };
 
-export default MyComponent;
+export default MyPlaces;
