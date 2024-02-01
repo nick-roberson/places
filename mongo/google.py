@@ -2,6 +2,7 @@ import os
 import json
 import googlemaps
 
+from tqdm import tqdm
 from mongo.models import Place
 from typing import List, Union
 
@@ -36,7 +37,7 @@ def seed(
         data = [d for d in data if d.get("name") not in existing]
 
     # loop and get restaurant info
-    for restaurant in data:
+    for restaurant in tqdm(data, desc="Seeding data"):
         try:
             restaurant_info = get_restaurant_info(
                 name=restaurant.get("name"), location=restaurant.get("location")

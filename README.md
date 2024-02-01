@@ -20,12 +20,12 @@ $ poetry run uvicorn server:app --reload
 
 Run the backend server:
 ```bash
-$ poetry run uvicorn server:app --reload
+$ poetry run uvicorn service:app --reload
 ```
 
 Then generate the client (run from root of this project, not the client directory):
 ```bash
-$ openapi-generator generate -i http://localhost:8080/openapi.json -g typescript-axios -o my-places/api
+$ openapi-generator generate -i http://localhost:8000/openapi.json -g typescript-fetch -o my-places/src/api
 ```
 
 ## Install Dependencies and Run:

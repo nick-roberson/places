@@ -12,13 +12,17 @@ import logging
 import uvicorn
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
 
 from mongo.restaurant_manager import RestaurantManager
 from mongo.models import Place
+from mongo.google import get_restaurant_info
 
 
 app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"])
+
 manager = RestaurantManager()
 logger = logging.getLogger(__name__)
 
@@ -34,6 +38,45 @@ def configure_logging():
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
+
+
+@app.post("/add")
+def add(
+    name: str,
+    location: str,
+) -> Place:
+    """Add a restaurant to the database.
+
+    Args:
+        name (str): Name of the restaurant
+        location (str): Address of the restaurant
+    """
+    logger.info(f"Adding {name} at {location}")
+    # check for name and address
+    if not name or not location:
+        print("Please provide a name and address")
+        return
+
+    # check it does not already exist
+    existing = manager.get(name, exact=False)
+    if existing:
+        print(
+            f"""Looks like something with a similar name already exists!
+        - existing: '{existing['name']}' at '{existing['formatted_address']}'
+        - new: '{name}' at '{location}'""
+        """
+        )
+        return
+
+    # fetch new place
+    new_place = get_restaurant_info(name=name, location=location)
+    if not new_place:
+        print(f"Could not find '{name}' at '{location}'")
+        return
+
+    new_place = manager.insert(new_place)
+    print(f"Inserted '{new_place}'")
+    return new_place
 
 
 @app.get("/all")

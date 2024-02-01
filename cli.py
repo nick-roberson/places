@@ -14,6 +14,13 @@ SEED_DATA = "/Users/nicholas/Code/sandbox_mongo_db/data/initial_places.json"
 
 
 @app.command()
+def drop_all():
+    """Drop all restaurants."""
+    manager.drop_all()
+    print(f"Dropped all from {manager.collection_name}")
+
+
+@app.command()
 def seed(
     input_file: str = typer.Argument(SEED_DATA, help="Path to the seed data"),
     limit: int = typer.Option(

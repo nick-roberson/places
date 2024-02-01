@@ -32,6 +32,10 @@ class PlusCode(BaseModel):
 class Place(BaseModel):
     """Place model"""
 
+    # Required fields
+    id: Optional[str] = None
+
+    # Required fields
     business_status: str
     formatted_address: str
     geometry: Geometry
@@ -40,11 +44,16 @@ class Place(BaseModel):
     name: str
     place_id: str
     plus_code: PlusCode
-    price_level: Optional[int] = None
-    rating: Optional[float] = None
     reference: str
     types: List[str]
     user_ratings_total: int
+
+    # Optional fields
+    price_level: Optional[int] = None
+    rating: Optional[float] = None
+
+    # Processed fields
+    reservation_url: Optional[str] = None
 
     def __init__(self, **data):
         """Ensure that all fields are set, allow none accounting for messy data."""
@@ -52,6 +61,14 @@ class Place(BaseModel):
         for field in fields:
             if field not in data:
                 data[field] = None
+
+        # Processed fields
+        data["reservation_url"] = None
+        if data["place_id"] and data["name"]:
+            data[
+                "reservation_url"
+            ] = f"https://www.google.com/maps/place/?q=place_id:{data['place_id']}"
+
         super().__init__(**data)
 
     def __str__(self):

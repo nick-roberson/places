@@ -1,6 +1,7 @@
 import pymongo
 import sys
 import os
+import uuid
 
 from typing import List
 from mongo.models import Place
@@ -46,16 +47,28 @@ class RestaurantManager:
         self.collection = get_collection(self.client, self.collection_name)
 
     ########################################################
+    # Drop All                                             #
+    ########################################################
+
+    def drop_all(self) -> None:
+        """Drop all restaurants"""
+        print(f"Dropping all from {self.collection_name}")
+        self.collection.drop()
+
+    ########################################################
     # Insert                                               #
     ########################################################
-    def insert(self, place: Place) -> None:
+    def insert(self, place: Place) -> Place:
         """Insert a restaurant into the database.
         Args:
             place (Place): Place model
         """
         print(f"Inserting {place.name} into {self.collection_name}")
         try:
-            self.collection.insert_one(place.dict())
+            place_dict = place.dict()
+            place_dict["id"] = str(uuid.uuid4())
+            self.collection.insert_one(place_dict)
+            return place
         except Exception as e:
             print(f"Error inserting {place.name}: {e}")
 
@@ -66,7 +79,10 @@ class RestaurantManager:
         """
         print(f"Inserting {len(places)} places into {self.collection_name}")
         try:
-            self.collection.insert_many([p.dict() for p in places])
+            dicts = [p.dict() for p in places]
+            for d in dicts:
+                d["id"] = str(uuid.uuid4())
+            self.collection.insert_many(dicts)
         except Exception as e:
             print(f"Error inserting places: {e}")
 
@@ -117,9 +133,11 @@ class RestaurantManager:
         return self.collection.find_one(query)
 
     def get_all(self) -> List[Place]:
-        """Get all restaurants"""
+        """Get all restaurants, ensure that names are sorted and unique"""
         print(f"Getting all from {self.collection_name}")
-        return [place for place in self.collection.find()]
+        results = [Place(**place) for place in self.collection.find()]
+        results.sort(key=lambda x: x.name)
+        return results
 
     def get_names(self) -> List[str]:
         """Get all restaurant names"""
