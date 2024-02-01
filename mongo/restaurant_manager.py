@@ -6,11 +6,7 @@ import uuid
 from typing import List
 from mongo.models import Place
 
-USER = os.environ.get("MONGO_USER")
-PASSWORD = os.environ.get("MONGO_PASSWORD")
-CLUSTER_NAME = os.environ.get("MONGO_CLUSTER")
-URI = f"mongodb+srv://{USER}:{PASSWORD}@{CLUSTER_NAME}.umyk1er.mongodb.net/?retryWrites=true&w=majority"
-
+MONGO_URI = os.environ.get("MONGO_URI")
 
 ###################################################################
 # Utility Functions                                               #
@@ -20,7 +16,7 @@ URI = f"mongodb+srv://{USER}:{PASSWORD}@{CLUSTER_NAME}.umyk1er.mongodb.net/?retr
 def get_client():
     """Gets MongoDB client"""
     try:
-        client = pymongo.MongoClient(URI)
+        client = pymongo.MongoClient(MONGO_URI)
         client.admin.command("ping")
     except pymongo.errors.ConfigurationError:
         print(
@@ -139,7 +135,13 @@ class RestaurantManager:
         results.sort(key=lambda x: x.name)
         return results
 
-    def get_names(self) -> List[str]:
-        """Get all restaurant names"""
-        print(f"Getting names from {self.collection_name}")
-        return [place["name"] for place in self.collection.find()]
+    def get_property_list(self, property_name: str) -> List[str]:
+        """Get a list of unique values for a property"""
+        print(f"Getting {property_name} from {self.collection_name}")
+        return self.collection.distinct(property_name)
+
+    def get_by_place_id(self, place_id: str) -> Place:
+        """Get a restaurant by place_id"""
+        print(f"Getting {place_id} from {self.collection_name}")
+        result = self.collection.find_one({"place_id": place_id})
+        return Place(**result) if result else None

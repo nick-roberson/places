@@ -54,7 +54,7 @@ def seed(
             return
 
     # fetch already inserted data
-    existing = manager.get_names()
+    existing = manager.get_property_list("name")
     print(f"Existing: {existing}")
 
     # fetch enriched seed data

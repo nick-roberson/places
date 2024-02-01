@@ -13,6 +13,7 @@ import uvicorn
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import HTTPException
 from typing import List, Optional
 
 from mongo.restaurant_manager import RestaurantManager
@@ -54,28 +55,28 @@ def add(
     logger.info(f"Adding {name} at {location}")
     # check for name and address
     if not name or not location:
-        print("Please provide a name and address")
-        return
-
-    # check it does not already exist
-    existing = manager.get(name, exact=False)
-    if existing:
-        print(
-            f"""Looks like something with a similar name already exists!
-        - existing: '{existing['name']}' at '{existing['formatted_address']}'
-        - new: '{name}' at '{location}'""
-        """
-        )
-        return
+        logger.info("Please provide a name and address")
+        raise HTTPException(status_code=400, detail="Please provide a name and address")
 
     # fetch new place
     new_place = get_restaurant_info(name=name, location=location)
     if not new_place:
-        print(f"Could not find '{name}' at '{location}'")
-        return
+        logger.info(f"Could not find '{name}' at '{location}'")
+        raise HTTPException(
+            status_code=404, detail=f"Could not find '{name}' at '{location}'"
+        )
+
+    # if the place is already in the database, raise an error
+    existing = manager.get_by_place_id(new_place.place_id)
+    if existing:
+        print(existing)
+        logger.info(
+            f"Already contains '{existing.name}' at '{existing.formatted_address}'"
+        )
+        return manager.get_by_place_id(new_place.place_id)
 
     new_place = manager.insert(new_place)
-    print(f"Inserted '{new_place}'")
+    logger.info(f"Inserted '{new_place}'")
     return new_place
 
 

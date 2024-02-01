@@ -20,7 +20,7 @@ import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 
-import { DataGrid, GridColDef, GridEventListener} from '@mui/x-data-grid';
+import { DataGrid, GridToolbar, GridColDef, GridEventListener} from '@mui/x-data-grid';
 
 // My imports
 import { Configuration } from './api/runtime';
@@ -64,12 +64,17 @@ const MyComponent = () => {
             console.log('API client not initialized yet, not adding');
             return;
         }
-        apiClient.addAddPostRaw({ name: newPlaceName, location: newPlaceLocation }).then((response) => {
-            console.log('Added place', response);
-            setNewPlaceName('');
-            setNewPlaceLocation('');
-            refreshPlaces();
-        });
+        try {
+            apiClient.addAddPostRaw({ name: newPlaceName, location: newPlaceLocation }).then((response) => {
+                console.log('Added place', response);
+                setNewPlaceName('');
+                setNewPlaceLocation('');
+                refreshPlaces();
+            });
+        } catch (error) {
+            console.error('Error adding place', error);
+            setMessage('Error adding place');
+        }
     };
 
     // Selected row in the table
@@ -93,7 +98,10 @@ const MyComponent = () => {
         }
 
         // Else filter the rows
-        const new_rows = rows.filter((row) => row.name.toLowerCase().includes(search.toLowerCase()));
+        const new_rows = rows.filter((row) =>
+            row.name.toLowerCase().includes(search.toLowerCase())
+            || row.formattedAddress.toLowerCase().includes(search.toLowerCase())
+        );
         setRows(new_rows);
     };
 
@@ -121,7 +129,7 @@ const MyComponent = () => {
             setColumns([
                 { field: 'name', headerName: 'Name', width: 250},
                 { field: 'businessStatus', headerName: 'Status', width: 130 },
-                { field: 'formattedAddress', headerName: 'Address', width: 400 },
+                { field: 'formattedAddress', headerName: 'Address', width: 600 },
                 { field: 'rating', headerName: 'Avg Rating', width: 130 },
                 { field: 'userRatingsTotal', headerName: 'Total Ratings', width: 130 },
                 { field: 'priceLevel', headerName: 'Price Level', width: 130 },
@@ -211,7 +219,7 @@ const MyComponent = () => {
 
                     {/* Input text bar for searching and filtering */}
                     <Grid xs={12}>
-                        <Input placeholder="Search names here ..." onChange={(event) => updateSearch(event.target.value)} />
+                        <Input placeholder="Search by name and location here ..." onChange={(event) => updateSearch(event.target.value)} />
                     </Grid>
 
                     {/* DataGrid of all places pull from API */}
@@ -228,6 +236,7 @@ const MyComponent = () => {
                                 }
                             }
                             pageSizeOptions={[10, 20]}
+                            slots={{ toolbar: GridToolbar }}
                         />
                     </Grid>
                 </Grid>
