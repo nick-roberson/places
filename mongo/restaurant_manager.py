@@ -74,7 +74,23 @@ class RestaurantManager:
     # Get                                                  #
     ########################################################
 
-    def search(self, query: dict, exact: bool = False) -> List[Place]:
+    def search(
+        self,
+        name: str = None,
+        address: str = None,
+        min_rating: float = None,
+        exact: bool = False,
+    ) -> List[Place]:
+        """Search for a restaurant by query"""
+        # assemble query
+        query = {}
+        if name:
+            query["name"] = name
+        if address:
+            query["formatted_address"] = address
+        if min_rating:
+            query["rating"] = {"$gte": min_rating}
+
         """Search for a restaurant by query"""
         # update query for case insensitive search
         if not exact:
@@ -84,6 +100,7 @@ class RestaurantManager:
             }
 
         # query
+        print(f"Searching for {query} in {self.collection_name}")
         results = [Place(**place) for place in self.collection.find(query)]
 
         # sort by name

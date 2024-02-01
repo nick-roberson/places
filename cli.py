@@ -79,17 +79,10 @@ def search(
         print("Please provide a name or address")
         raise typer.Abort()
 
-    # assemble query
-    query = {}
-    if name:
-        query["name"] = name
-    if address:
-        query["formatted_address"] = address
-    if min_rating:
-        query["rating"] = {"$gte": min_rating}
-
     # search
-    places = manager.search(query, exact)
+    places = manager.search(
+        name=name, address=address, min_rating=min_rating, exact=exact
+    )
     if not places:
         print("No places found")
         return
