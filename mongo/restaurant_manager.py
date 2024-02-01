@@ -18,7 +18,6 @@ URI = f"mongodb+srv://{USER}:{PASSWORD}@{CLUSTER_NAME}.umyk1er.mongodb.net/?retr
 
 def get_client():
     """Gets MongoDB client"""
-    print("Getting MongoDB client")
     try:
         client = pymongo.MongoClient(URI)
         client.admin.command("ping")
@@ -31,7 +30,6 @@ def get_client():
 
 
 def get_collection(client, collection_name):
-    print(f"Getting collection {collection_name}")
     db = client.myDatabase
     return db[collection_name]
 
@@ -43,7 +41,6 @@ def get_collection(client, collection_name):
 
 class RestaurantManager:
     def __init__(self):
-        print("Initializing RestaurantManager")
         self.client = get_client()
         self.collection_name = "restaurants"
         self.collection = get_collection(self.client, self.collection_name)
@@ -51,19 +48,33 @@ class RestaurantManager:
     ########################################################
     # Insert                                               #
     ########################################################
-    def insert(self, place: Place):
+    def insert(self, place: Place) -> None:
+        """Insert a restaurant into the database.
+        Args:
+            place (Place): Place model
+        """
         print(f"Inserting {place.name} into {self.collection_name}")
-        self.collection.insert_one(place.dict())
+        try:
+            self.collection.insert_one(place.dict())
+        except Exception as e:
+            print(f"Error inserting {place.name}: {e}")
 
-    def insert_many(self, places: List[Place]):
+    def insert_many(self, places: List[Place]) -> None:
+        """Insert multiple restaurants into the database.
+        Args:
+            places (List[Place]): List of Place models
+        """
         print(f"Inserting {len(places)} places into {self.collection_name}")
-        self.collection.insert_many([p.dict() for p in places])
+        try:
+            self.collection.insert_many([p.dict() for p in places])
+        except Exception as e:
+            print(f"Error inserting places: {e}")
 
     ########################################################
     # Get                                                  #
     ########################################################
 
-    def search(self, query: dict, exact: bool = False):
+    def search(self, query: dict, exact: bool = False) -> List[Place]:
         """Search for a restaurant by query"""
         # update query for case insensitive search
         if not exact:
@@ -79,7 +90,7 @@ class RestaurantManager:
         results.sort(key=lambda x: x.name)
         return results
 
-    def get(self, name: str, exact: bool = False):
+    def get(self, name: str, exact: bool = False) -> Place:
         """Get a restaurant by name"""
         if exact:
             query = {"name": name}
@@ -88,11 +99,12 @@ class RestaurantManager:
         print(f"Getting {name} from {self.collection_name}")
         return self.collection.find_one(query)
 
-    def get_all(self):
+    def get_all(self) -> List[Place]:
         """Get all restaurants"""
         print(f"Getting all from {self.collection_name}")
         return [place for place in self.collection.find()]
 
-    def get_names(self):
+    def get_names(self) -> List[str]:
+        """Get all restaurant names"""
         print(f"Getting names from {self.collection_name}")
         return [place["name"] for place in self.collection.find()]

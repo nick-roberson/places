@@ -3,15 +3,22 @@ import json
 import googlemaps
 
 from mongo.models import Place
-from typing import List
+from typing import List, Union
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 INITIAL_RESTAURANTS = "/Users/nicholas/Code/sandbox_mongo_db/data/initial_places.json"
 
 
-def seed(fp: str = INITIAL_RESTAURANTS, existing: List[str] = None, limit: int = None):
+def seed(
+    input_file: str = INITIAL_RESTAURANTS, existing: List[str] = None, limit: int = None
+):
     """
-    Seed the database with initial data
+    Seed the database with initial data.
+
+    Args:
+        input_file (str, optional): Path to the seed data. Defaults to INITIAL_RESTAURANTS.
+        existing (List[str], optional): List of existing restaurant names. Defaults to None.
+        limit (int, optional): Limit the number of records to seed. Defaults to None.
     """
     # check if exists
     if not os.path.exists(INITIAL_RESTAURANTS):
@@ -19,7 +26,7 @@ def seed(fp: str = INITIAL_RESTAURANTS, existing: List[str] = None, limit: int =
         return
 
     # load initial data
-    with open(fp, "r") as f:
+    with open(input_file, "r") as f:
         data = json.load(f)
 
     # limit data based on limit or existing names
@@ -34,7 +41,7 @@ def seed(fp: str = INITIAL_RESTAURANTS, existing: List[str] = None, limit: int =
             restaurant_info = get_restaurant_info(
                 name=restaurant.get("name"), location=restaurant.get("location")
             )
-            restaurant["info"] = Place(**restaurant_info)
+            restaurant["info"] = restaurant_info
         except Exception as e:
             print(f"Error getting restaurant info for {restaurant.get('name')}: {e}")
             continue
@@ -43,11 +50,20 @@ def seed(fp: str = INITIAL_RESTAURANTS, existing: List[str] = None, limit: int =
     return [d for d in data if d.get("info") is not None]
 
 
-def get_restaurant_info(name: str, location: str = None):
+def get_restaurant_info(name: str, location: str = None) -> Union[Place, None]:
     """
     Get restaurant info from Google Places API
     """
+    # build query and get supplemental info
     query = name if location is None else f"{name} near {location}"
     gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
     places_result = gmaps.places(query=query)
-    return places_result["results"][0]
+
+    # check if results, return None otherwise
+    if not places_result["results"]:
+        print(f"No results found for {name}")
+        return None
+
+    # return first result
+    first = places_result["results"][0]
+    return Place(**first)
