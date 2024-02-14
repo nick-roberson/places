@@ -257,7 +257,7 @@ const MyPlaces = () => {
                         <Input placeholder="Search by name and location here ..." onChange={(event) => updateSearch(event.target.value)} />
                     </Grid>
                     {/* DataGrid of all places pull from API */}
-                    <Grid xs={9}>
+                    <Grid xs={12}>
                         <DataGrid
                             onRowClick={handleEvent}
                             rows={rows}
@@ -272,9 +272,6 @@ const MyPlaces = () => {
                             pageSizeOptions={[10, 20]}
                             slots={{ toolbar: GridToolbar }}
                         />
-                    </Grid>
-                    <Grid xs={3}>
-                        {RenderBarChart(rows, 'rating', 'Rating')}
                     </Grid>
                 </Grid>
             </Box>

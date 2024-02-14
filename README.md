@@ -54,7 +54,7 @@ $ poetry install
 ```
 Run the server from directory root:
 ```bash
-$ poetry run uvicorn server:app --reload
+$ poetry run uvicorn service:app --reload
 ```
 
 # Front End

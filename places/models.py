@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict
 
 
 class PlaceInsertModel(BaseModel):
@@ -65,6 +65,7 @@ class Place(BaseModel):
 
     # Processed fields
     reservation_url: Optional[str] = None
+    comments: Optional[List[Dict]] = []
 
     def __init__(self, **data):
         """Ensure that all fields are set, allow none accounting for messy data."""
@@ -87,3 +88,20 @@ class Place(BaseModel):
 
     def __repr__(self):
         return self.name
+
+
+class CommentInsertModel(BaseModel):
+    """Comment model passed on insert to the database"""
+
+    place_id: str
+    text: str
+
+
+class CommentModel(BaseModel):
+    """Comment model returned from the database"""
+
+    comment_id: str
+    place_id: str
+    text: str
+    created_at: str
+    updated_at: str

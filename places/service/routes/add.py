@@ -1,26 +1,19 @@
-""" Simple FastAPI service
-
-To run this do the following:
-    > export LOG_VERBOSE="1" && poetry run uvicorn service:app --reload
-
-Then open your browser and go to:
-    > http://localhost:8000/get/all
-"""
-
+# Standard
 import os
 import logging
-import uvicorn
 
+# Third Party
 from fastapi import APIRouter
 from fastapi import HTTPException
-from typing import List, Optional, Dict
+from typing import List, Dict
 
-from places.manager import RestaurantManager
-from places.models import Place, APIKey, PlaceInsertModel
-from places.google import get_restaurant_info
+# Places Code
+from places.manager import get_manager
+from places.models import Place, PlaceInsertModel
+from places.google.google import get_restaurant_info
 
 # Constants
-manager = None
+manager = get_manager()
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
@@ -33,7 +26,7 @@ def configure_logging():
     )
 
 
-@app.post("/add")
+@router.post("/add")
 def add(
     name: str,
     location: str,
@@ -72,7 +65,7 @@ def add(
     return new_place
 
 
-@app.post("/add/many")
+@router.post("/add/many")
 def add_many(places: List[PlaceInsertModel]) -> List[Place]:
     """Add multiple restaurants to the database.
 
