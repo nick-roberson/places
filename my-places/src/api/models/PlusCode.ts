@@ -21,16 +21,16 @@ import { exists, mapValues } from '../runtime';
 export interface PlusCode {
     /**
      * 
-     * @type {string}
+     * @type {any}
      * @memberof PlusCode
      */
-    compoundCode: string;
+    compoundCode: any | null;
     /**
      * 
-     * @type {string}
+     * @type {any}
      * @memberof PlusCode
      */
-    globalCode: string;
+    globalCode: any | null;
 }
 
 /**

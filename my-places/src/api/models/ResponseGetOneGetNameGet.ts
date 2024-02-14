@@ -37,6 +37,12 @@ import {
     IdFromJSONTyped,
     IdToJSON,
 } from './Id';
+import type { Place } from './Place';
+import {
+    PlaceFromJSON,
+    PlaceFromJSONTyped,
+    PlaceToJSON,
+} from './Place';
 import type { PlusCode } from './PlusCode';
 import {
     PlusCodeFromJSON,
@@ -63,119 +69,119 @@ import {
 } from './ReservationUrl';
 
 /**
- * Place model
+ * 
  * @export
- * @interface Place
+ * @interface ResponseGetOneGetNameGet
  */
-export interface Place {
+export interface ResponseGetOneGetNameGet {
     /**
      * 
      * @type {Id}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     id?: Id;
     /**
      * 
      * @type {any}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     businessStatus: any | null;
     /**
      * 
      * @type {any}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     formattedAddress: any | null;
     /**
      * 
      * @type {Geometry}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     geometry: Geometry;
     /**
      * 
      * @type {any}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     iconBackgroundColor: any | null;
     /**
      * 
      * @type {any}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     iconMaskBaseUri: any | null;
     /**
      * 
      * @type {any}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     name: any | null;
     /**
      * 
      * @type {any}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     placeId: any | null;
     /**
      * 
      * @type {PlusCode}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     plusCode: PlusCode;
     /**
      * 
      * @type {any}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     reference: any | null;
     /**
      * 
      * @type {any}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     types: any | null;
     /**
      * 
      * @type {any}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     userRatingsTotal: any | null;
     /**
      * 
      * @type {PriceLevel}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     priceLevel?: PriceLevel;
     /**
      * 
      * @type {Rating}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     rating?: Rating;
     /**
      * 
      * @type {Collection}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     collection?: Collection;
     /**
      * 
      * @type {ReservationUrl}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     reservationUrl?: ReservationUrl;
     /**
      * 
      * @type {Comments}
-     * @memberof Place
+     * @memberof ResponseGetOneGetNameGet
      */
     comments?: Comments;
 }
 
 /**
- * Check if a given object implements the Place interface.
+ * Check if a given object implements the ResponseGetOneGetNameGet interface.
  */
-export function instanceOfPlace(value: object): boolean {
+export function instanceOfResponseGetOneGetNameGet(value: object): boolean {
     let isInstance = true;
     isInstance = isInstance && "businessStatus" in value;
     isInstance = isInstance && "formattedAddress" in value;
@@ -192,11 +198,11 @@ export function instanceOfPlace(value: object): boolean {
     return isInstance;
 }
 
-export function PlaceFromJSON(json: any): Place {
-    return PlaceFromJSONTyped(json, false);
+export function ResponseGetOneGetNameGetFromJSON(json: any): ResponseGetOneGetNameGet {
+    return ResponseGetOneGetNameGetFromJSONTyped(json, false);
 }
 
-export function PlaceFromJSONTyped(json: any, ignoreDiscriminator: boolean): Place {
+export function ResponseGetOneGetNameGetFromJSONTyped(json: any, ignoreDiscriminator: boolean): ResponseGetOneGetNameGet {
     if ((json === undefined) || (json === null)) {
         return json;
     }
@@ -222,7 +228,7 @@ export function PlaceFromJSONTyped(json: any, ignoreDiscriminator: boolean): Pla
     };
 }
 
-export function PlaceToJSON(value?: Place | null): any {
+export function ResponseGetOneGetNameGetToJSON(value?: ResponseGetOneGetNameGet | null): any {
     if (value === undefined) {
         return undefined;
     }

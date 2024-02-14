@@ -21,16 +21,16 @@ import { exists, mapValues } from '../runtime';
 export interface Location {
     /**
      * 
-     * @type {number}
+     * @type {any}
      * @memberof Location
      */
-    lat: number;
+    lat: any | null;
     /**
      * 
-     * @type {number}
+     * @type {any}
      * @memberof Location
      */
-    lng: number;
+    lng: any | null;
 }
 
 /**

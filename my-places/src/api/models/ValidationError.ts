@@ -13,13 +13,6 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { ValidationErrorLocInner } from './ValidationErrorLocInner';
-import {
-    ValidationErrorLocInnerFromJSON,
-    ValidationErrorLocInnerFromJSONTyped,
-    ValidationErrorLocInnerToJSON,
-} from './ValidationErrorLocInner';
-
 /**
  * 
  * @export
@@ -28,22 +21,22 @@ import {
 export interface ValidationError {
     /**
      * 
-     * @type {Array<ValidationErrorLocInner>}
+     * @type {any}
      * @memberof ValidationError
      */
-    loc: Array<ValidationErrorLocInner>;
+    loc: any | null;
     /**
      * 
-     * @type {string}
+     * @type {any}
      * @memberof ValidationError
      */
-    msg: string;
+    msg: any | null;
     /**
      * 
-     * @type {string}
+     * @type {any}
      * @memberof ValidationError
      */
-    type: string;
+    type: any | null;
 }
 
 /**
@@ -68,7 +61,7 @@ export function ValidationErrorFromJSONTyped(json: any, ignoreDiscriminator: boo
     }
     return {
         
-        'loc': ((json['loc'] as Array<any>).map(ValidationErrorLocInnerFromJSON)),
+        'loc': json['loc'],
         'msg': json['msg'],
         'type': json['type'],
     };
@@ -83,7 +76,7 @@ export function ValidationErrorToJSON(value?: ValidationError | null): any {
     }
     return {
         
-        'loc': ((value.loc as Array<any>).map(ValidationErrorLocInnerToJSON)),
+        'loc': value.loc,
         'msg': value.msg,
         'type': value.type,
     };

@@ -21,10 +21,10 @@ import { exists, mapValues } from '../runtime';
 export interface APIKey {
     /**
      * 
-     * @type {string}
+     * @type {any}
      * @memberof APIKey
      */
-    key: string;
+    key: any | null;
 }
 
 /**

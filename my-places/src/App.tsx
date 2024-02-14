@@ -19,6 +19,11 @@ import Button from '@mui/material/Button';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import Divider from '@mui/material/Divider';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
 
 // Complex imports
 import { DataGrid, GridToolbar, GridColDef, GridEventListener} from '@mui/x-data-grid';
@@ -39,7 +44,7 @@ const renderDetailsButton = (params: any) => {
                 color="primary"
                 size="small"
                 style={{ marginLeft: 16 }}
-                onClick={() => window.open(params.row.reservationUrl, '_blank')}
+                onClick={() => window.open(params.row.reservation_url, '_blank')}
             >
                 Google Lookup
             </Button>
@@ -47,36 +52,55 @@ const renderDetailsButton = (params: any) => {
     )
 }
 
-function RenderBarChart(places: Place[], dataKey: string, chartLabel: string) {
-    if (places.length === 0) {
-        return <div>No places to display</div>;
+const renderCommentsCell = (params: any) => {
+    // If comments are present, get the number of comments
+    let num_comments = 0
+    if (params.row.comments) {
+        num_comments = params.row.comments.length
+    }
+    // Return the button with the number of comments
+    return (
+        <strong>
+            {num_comments} Comments
+        </strong>
+    )
+}
+
+function renderCommentsCards(place: any) {
+    // check that place is not null
+    if (!place) {
+        return <div>No Comments</div>
     }
 
-    // Filter out places with missing rating or price priceLevel
-    places = places.filter((place) => place.rating && place.priceLevel);
+    // check that comments are not null
+    if (!place.comments) {
+        return <div>No Comments</div>
+    }
 
-    // Create a dataset for the bar chart
-    const dataset = places.map((place) => {
-        return {
-            name: place.name,
-            rating: place.rating,
-            userRatingsTotal: place.userRatingsTotal,
-        };
-    });
-
-    const valueFormatter = (value: number) => `${value}`;
-
-    // order bars by rating
+    // render the comments
     return (
-        <BarChart
-          dataset={dataset}
-          xAxis={[{ scaleType: 'band', dataKey: 'name', label: 'Name' }]}
-          series={[
-            { dataKey: dataKey,  label: chartLabel, valueFormatter },
-          ]}
-        />
-    );
-}
+        <div>
+            <List sx={{ maxHeight: '50vh', overflow: 'auto'}}>
+                {place.comments.map((comment: any) => (
+                    <div>
+                        <ListItem alignItems="flex-start">
+                            <ListItemText
+                                primary={comment.created_at}
+                                secondary={
+                                    <React.Fragment>
+                                        {comment.text}
+                                    </React.Fragment>
+                                }
+                            />
+                        </ListItem>
+                        <Divider variant="inset" component="li" />
+                    </div>
+                ))}
+            </List>
+        </div>
+    )
+};
+
 
 // Define the component
 const MyPlaces = () => {
@@ -89,6 +113,40 @@ const MyPlaces = () => {
     const [places, setPlaces] = useState<Place[]>([]);
     const [rows, setRows] = useState<Place[]>([]);
     const [columns, setColumns] = useState<GridColDef[]>([]);
+
+    // Create state for new comments and add comment function
+    const [newComment, setNewComment] = useState<string>('');
+    const addComment = () => {
+        console.log('Adding a new comment', newComment);
+        if (!apiClient) {
+            console.log('API client not initialized yet, not adding');
+            return;
+        }
+        if (!selectedRow) {
+            console.log('No place selected, not adding');
+            return;
+        }
+        if (newComment === '') {
+            console.log('No comment entered, not adding');
+            return;
+        }
+
+        console.log("Adding comment to place", selectedRow?.placeId, newComment)
+        try {
+            apiClient.addCommentCommentsAddPost({
+                commentInsertModel: {
+                    placeId: selectedRow?.placeId,
+                    text: newComment,
+                }
+            }).then((response) => {
+                console.log('Added comment', response);
+                refreshPlaces(true);
+            });
+        } catch (error) {
+            console.error('Error adding comment', error);
+            setMessage('Error adding comment');
+        }
+    };
 
     // vars and functions for adding new places
     const [newPlaceName, setNewPlaceName] = useState<string>('');
@@ -113,7 +171,7 @@ const MyPlaces = () => {
     // Selected row in the table
     const [selectedRow, setSelectedRow] = useState<Place | null>(null);
     const [message, setMessage] = useState<string>('');
-    const handleEvent: GridEventListener<'rowClick'> = (
+    const rowClickEvent: GridEventListener<'rowClick'> = (
       params, // GridRowParams
       event, // MuiEvent<React.MouseEvent<HTMLElement>>
       details, // GridCallbackDetails
@@ -166,13 +224,14 @@ const MyPlaces = () => {
             setRows(new_places);
             setColumns([
                 { field: 'name', headerName: 'Name', width: 250},
-                { field: 'businessStatus', headerName: 'Status', width: 130 },
-                { field: 'formattedAddress', headerName: 'Address', width: 400 },
+                { field: 'business_status', headerName: 'Status', width: 130 },
+                { field: 'formatted_address', headerName: 'Address', width: 400 },
                 { field: 'rating', headerName: 'Avg Rating', width: 100 },
-                { field: 'userRatingsTotal', headerName: 'Total Ratings', width: 100 },
-                { field: 'priceLevel', headerName: 'Price Level', width: 100 },
+                { field: 'user_ratings_total', headerName: 'Total Ratings', width: 100 },
+                { field: 'price_level', headerName: 'Price Level', width: 100 },
                 // Add field for link our to google reservations
-                { field: 'reservationUrl', headerName: 'Reservations', width: 200, renderCell: renderDetailsButton },
+                { field: 'reservation_url', headerName: 'Reservations', width: 200, renderCell: renderDetailsButton },
+                { field: 'comments', headerName: 'Comments', width: 200, renderCell: renderCommentsCell },
             ]);
         });
     };
@@ -257,9 +316,9 @@ const MyPlaces = () => {
                         <Input placeholder="Search by name and location here ..." onChange={(event) => updateSearch(event.target.value)} />
                     </Grid>
                     {/* DataGrid of all places pull from API */}
-                    <Grid xs={12}>
+                    <Grid xs={9}>
                         <DataGrid
-                            onRowClick={handleEvent}
+                            onRowClick={rowClickEvent}
                             rows={rows}
                             columns={columns}
                             initialState={
@@ -272,6 +331,25 @@ const MyPlaces = () => {
                             pageSizeOptions={[10, 20]}
                             slots={{ toolbar: GridToolbar }}
                         />
+                    </Grid>
+                    <Grid xs={3}>
+
+                        <div><h2>Comments</h2></div>
+                        <Divider textAlign="center" component="div" >Your comments</Divider>
+
+                        <div>{renderCommentsCards(selectedRow)}</div>
+                        <Divider textAlign="center">Add new comment</Divider>
+
+                        <div>
+                            <Grid container spacing={2}>
+                                <Grid xs={6}>
+                                    <Input placeholder="New Comment ..." onChange={(event) => setNewComment(event.target.value)} />
+                                </Grid>
+                                <Grid xs={6}>
+                                    <Button variant="contained" color="primary" onClick={() => addComment()}>Add Comment </Button>
+                                </Grid>
+                            </Grid>
+                        </div>
                     </Grid>
                 </Grid>
             </Box>

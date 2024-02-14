@@ -16,16 +16,37 @@
 import * as runtime from '../runtime';
 import type {
   APIKey,
+  Address,
+  CommentInsertModel,
+  CommentModel,
   HTTPValidationError,
+  MinRating,
+  Name,
   Place,
+  PlaceInsertModel,
+  ResponseGetOneGetNameGet,
 } from '../models/index';
 import {
     APIKeyFromJSON,
     APIKeyToJSON,
+    AddressFromJSON,
+    AddressToJSON,
+    CommentInsertModelFromJSON,
+    CommentInsertModelToJSON,
+    CommentModelFromJSON,
+    CommentModelToJSON,
     HTTPValidationErrorFromJSON,
     HTTPValidationErrorToJSON,
+    MinRatingFromJSON,
+    MinRatingToJSON,
+    NameFromJSON,
+    NameToJSON,
     PlaceFromJSON,
     PlaceToJSON,
+    PlaceInsertModelFromJSON,
+    PlaceInsertModelToJSON,
+    ResponseGetOneGetNameGetFromJSON,
+    ResponseGetOneGetNameGetToJSON,
 } from '../models/index';
 
 export interface AddAddPostRequest {
@@ -33,16 +54,36 @@ export interface AddAddPostRequest {
     location: string;
 }
 
+export interface AddCommentCommentsAddPostRequest {
+    commentInsertModel: CommentInsertModel;
+}
+
+export interface AddManyAddManyPostRequest {
+    placeInsertModel: Array<PlaceInsertModel>;
+}
+
+export interface DeleteDeletePostRequest {
+    placeId: string;
+}
+
+export interface DeleteManyDeleteManyPostRequest {
+    requestBody: Array<string>;
+}
+
+export interface GetCommentsCommentsGetGetRequest {
+    placeId: any;
+}
+
 export interface GetOneGetNameGetRequest {
-    name: string;
-    exact?: boolean;
+    name: any;
+    exact?: any;
 }
 
 export interface SearchSearchGetRequest {
-    name?: string | null;
-    address?: string | null;
-    minRating?: number | null;
-    exact?: boolean;
+    name?: Name;
+    address?: Address;
+    minRating?: MinRating;
+    exact?: any;
 }
 
 /**
@@ -95,10 +136,159 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
+     * Add a restaurant to the database.  Args:     comment (Comment): Comment to add to the place
+     * Add Comment
+     */
+    async addCommentCommentsAddPostRaw(requestParameters: AddCommentCommentsAddPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CommentModel>> {
+        if (requestParameters.commentInsertModel === null || requestParameters.commentInsertModel === undefined) {
+            throw new runtime.RequiredError('commentInsertModel','Required parameter requestParameters.commentInsertModel was null or undefined when calling addCommentCommentsAddPost.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/comments/add`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: CommentInsertModelToJSON(requestParameters.commentInsertModel),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => CommentModelFromJSON(jsonValue));
+    }
+
+    /**
+     * Add a restaurant to the database.  Args:     comment (Comment): Comment to add to the place
+     * Add Comment
+     */
+    async addCommentCommentsAddPost(requestParameters: AddCommentCommentsAddPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CommentModel> {
+        const response = await this.addCommentCommentsAddPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Add multiple restaurants to the database.  Args:     places (List[Dict[str, str]]): List of restaurants to add
+     * Add Many
+     */
+    async addManyAddManyPostRaw(requestParameters: AddManyAddManyPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Place>>> {
+        if (requestParameters.placeInsertModel === null || requestParameters.placeInsertModel === undefined) {
+            throw new runtime.RequiredError('placeInsertModel','Required parameter requestParameters.placeInsertModel was null or undefined when calling addManyAddManyPost.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/add/many`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters.placeInsertModel.map(PlaceInsertModelToJSON),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(PlaceFromJSON));
+    }
+
+    /**
+     * Add multiple restaurants to the database.  Args:     places (List[Dict[str, str]]): List of restaurants to add
+     * Add Many
+     */
+    async addManyAddManyPost(requestParameters: AddManyAddManyPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Place>> {
+        const response = await this.addManyAddManyPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Simple, delete single place.
+     * Delete
+     */
+    async deleteDeletePostRaw(requestParameters: DeleteDeletePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<any>> {
+        if (requestParameters.placeId === null || requestParameters.placeId === undefined) {
+            throw new runtime.RequiredError('placeId','Required parameter requestParameters.placeId was null or undefined when calling deleteDeletePost.');
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters.placeId !== undefined) {
+            queryParameters['place_id'] = requestParameters.placeId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/delete`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<any>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * Simple, delete single place.
+     * Delete
+     */
+    async deleteDeletePost(requestParameters: DeleteDeletePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<any> {
+        const response = await this.deleteDeletePostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Simple, delete multiple places.
+     * Delete Many
+     */
+    async deleteManyDeleteManyPostRaw(requestParameters: DeleteManyDeleteManyPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<any>> {
+        if (requestParameters.requestBody === null || requestParameters.requestBody === undefined) {
+            throw new runtime.RequiredError('requestBody','Required parameter requestParameters.requestBody was null or undefined when calling deleteManyDeleteManyPost.');
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/delete/many`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: requestParameters.requestBody,
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<any>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * Simple, delete multiple places.
+     * Delete Many
+     */
+    async deleteManyDeleteManyPost(requestParameters: DeleteManyDeleteManyPostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<any> {
+        const response = await this.deleteManyDeleteManyPostRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Get all restaurants.
      * Get All
      */
-    async getAllAllGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Place>>> {
+    async getAllAllGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<any>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -110,15 +300,59 @@ export class DefaultApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(PlaceFromJSON));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<any>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Get all restaurants.
      * Get All
      */
-    async getAllAllGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Place>> {
+    async getAllAllGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<any> {
         const response = await this.getAllAllGetRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Get all comments for a place.  Args:     place_id (str): Place to get comments for
+     * Get Comments
+     */
+    async getCommentsCommentsGetGetRaw(requestParameters: GetCommentsCommentsGetGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<any>> {
+        if (requestParameters.placeId === null || requestParameters.placeId === undefined) {
+            throw new runtime.RequiredError('placeId','Required parameter requestParameters.placeId was null or undefined when calling getCommentsCommentsGetGet.');
+        }
+
+        const queryParameters: any = {};
+
+        if (requestParameters.placeId !== undefined) {
+            queryParameters['place_id'] = requestParameters.placeId;
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/comments/get`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        }, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<any>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * Get all comments for a place.  Args:     place_id (str): Place to get comments for
+     * Get Comments
+     */
+    async getCommentsCommentsGetGet(requestParameters: GetCommentsCommentsGetGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<any> {
+        const response = await this.getCommentsCommentsGetGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -154,7 +388,7 @@ export class DefaultApi extends runtime.BaseAPI {
      * Get one restaurant by name  Args:     name (str): Name of the restaurant to get     exact (bool, optional): Exact match for name. Defaults to False.
      * Get One
      */
-    async getOneGetNameGetRaw(requestParameters: GetOneGetNameGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Place>> {
+    async getOneGetNameGetRaw(requestParameters: GetOneGetNameGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResponseGetOneGetNameGet>> {
         if (requestParameters.name === null || requestParameters.name === undefined) {
             throw new runtime.RequiredError('name','Required parameter requestParameters.name was null or undefined when calling getOneGetNameGet.');
         }
@@ -174,14 +408,14 @@ export class DefaultApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => PlaceFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ResponseGetOneGetNameGetFromJSON(jsonValue));
     }
 
     /**
      * Get one restaurant by name  Args:     name (str): Name of the restaurant to get     exact (bool, optional): Exact match for name. Defaults to False.
      * Get One
      */
-    async getOneGetNameGet(requestParameters: GetOneGetNameGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Place> {
+    async getOneGetNameGet(requestParameters: GetOneGetNameGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResponseGetOneGetNameGet> {
         const response = await this.getOneGetNameGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -220,7 +454,7 @@ export class DefaultApi extends runtime.BaseAPI {
      * Search for a restaurant by name.  Args:     name (str, optional): Name of the restaurant to lookup. Defaults to None.     address (str, optional): Address of the restaurant to lookup. Defaults to None.     min_rating (float, optional): Minimum rating for the restaurant. Defaults to None.     exact (bool, optional): Exact match for name. Defaults to False.
      * Search
      */
-    async searchSearchGetRaw(requestParameters: SearchSearchGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Place>>> {
+    async searchSearchGetRaw(requestParameters: SearchSearchGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<any>> {
         const queryParameters: any = {};
 
         if (requestParameters.name !== undefined) {
@@ -248,14 +482,18 @@ export class DefaultApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(PlaceFromJSON));
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<any>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
     }
 
     /**
      * Search for a restaurant by name.  Args:     name (str, optional): Name of the restaurant to lookup. Defaults to None.     address (str, optional): Address of the restaurant to lookup. Defaults to None.     min_rating (float, optional): Minimum rating for the restaurant. Defaults to None.     exact (bool, optional): Exact match for name. Defaults to False.
      * Search
      */
-    async searchSearchGet(requestParameters: SearchSearchGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Place>> {
+    async searchSearchGet(requestParameters: SearchSearchGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<any> {
         const response = await this.searchSearchGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
