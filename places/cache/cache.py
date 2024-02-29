@@ -106,8 +106,3 @@ class Cache:
         """Get all keys matching pattern."""
         all_keys = self.client.keys(pattern)
         return [key.decode("utf-8") for key in all_keys]
-
-
-# Global Redis Client
-redis_client = get_redis_client()
-places_cache = get_places_cache()

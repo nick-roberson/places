@@ -8,22 +8,22 @@ Then open your browser and go to:
 """
 
 # Standard Library
-import os
 import logging
 
 # Third Party
-from fastapi import APIRouter, Response
+from fastapi import APIRouter
 from typing import List, Optional
 
 # Places Code
 from places.manager import get_manager
 from places.models import Place, APIKey
-from places.cache.cache import places_cache
+from places.cache.cache import get_places_cache
 from constants import GOOGLE_API_KEY
 
-# Constants
+places_cache = get_places_cache()
 manager = get_manager()
 router = APIRouter()
+
 logger = logging.getLogger(__name__)
 
 
