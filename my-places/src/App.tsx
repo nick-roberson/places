@@ -37,8 +37,9 @@ import { Configuration } from './api';
 import { DefaultApi } from './api/apis';
 import { Place } from './api/models/Place';
 import fetchApiKey from "./components/google_api_key"
+import { render } from '@testing-library/react';
 
-// Function that will open in new tab a link from the param
+
 const renderDetailsButton = (params: any) => {
     return (
         <strong>
@@ -46,10 +47,10 @@ const renderDetailsButton = (params: any) => {
                 variant="contained"
                 color="primary"
                 size="small"
-                style={{ marginLeft: 16 }}
+                style={{ marginLeft: 4 }}
                 onClick={() => window.open(params.row.reservation_url, '_blank')}
             >
-                Google Lookup
+                Lookup
             </Button>
         </strong>
     )
@@ -65,6 +66,34 @@ const renderCommentsCell = (params: any) => {
     return (
         <strong>
             {num_comments} Comments
+        </strong>
+    )
+}
+
+const renderDeleteButton = (params: any) => {
+    return (
+        <strong>
+            <IconButton edge="end" aria-label="delete">
+                <DeleteIcon
+                    onClick={() => {
+                        console.log('Deleting', params.row.name)
+                        // Init Client 
+                        const configuration = new Configuration({
+                            basePath: "http://localhost:8000",
+                        });
+                        const api = new DefaultApi(configuration);
+                        // Delete the place
+                        try {
+                            api.deleteDeletePost({ placeIdOrName: params.row.name }).then((response) => {
+                                console.log('Deleted place', response);
+                            });
+                        } catch (error) {
+                            console.error('Error deleting place', error);
+                        }
+                    }
+                }
+                />
+            </IconButton>
         </strong>
     )
 }
@@ -237,20 +266,27 @@ const MyPlaces = () => {
         }
 
         // Load all places from the API
-        apiClient.getAllAllGet().then((new_places: Array<Place>) => {
+        apiClient.getAllAllGet({force: true}).then((new_places: Array<Place>) => {
             console.log('Loading places from API', new_places);
             setPlaces(new_places);
             setRows(new_places);
             setColumns([
+                // Add fields for basic information
                 { field: 'name', headerName: 'Name', width: 250},
                 { field: 'business_status', headerName: 'Status', width: 130 },
-                { field: 'formatted_address', headerName: 'Address', width: 400 },
-                { field: 'rating', headerName: 'Avg Rating', width: 100 },
-                { field: 'user_ratings_total', headerName: 'Total Ratings', width: 100 },
-                { field: 'price_level', headerName: 'Price Level', width: 100 },
+                { field: 'formatted_address', headerName: 'Address', width: 300 },
+                { field: 'rating', headerName: 'Avg Rating', width: 80 },
+                { field: 'user_ratings_total', headerName: 'Total Ratings', width: 80 },
+                { field: 'price_level', headerName: 'Price Level', width: 80 },
+
                 // Add field for link our to google reservations
-                { field: 'reservation_url', headerName: 'Reservations', width: 200, renderCell: renderDetailsButton },
-                { field: 'comments', headerName: 'Comments', width: 200, renderCell: renderCommentsCell },
+                { field: 'reservation_url', headerName: 'Reservations', width: 100, renderCell: renderDetailsButton },
+
+                // Add field for comments summary
+                { field: 'comments', headerName: 'Comments', width: 100, renderCell: renderCommentsCell },
+
+                // Add field for delete button
+                { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteButton },
             ]);
         });
     };
@@ -319,7 +355,7 @@ const MyPlaces = () => {
                             </AccordionDetails>
                         </Accordion>
                     </Grid>
-                    
+
                     {/* Display message */}
                     <Grid xs={4}>
                         <Alert severity="info">

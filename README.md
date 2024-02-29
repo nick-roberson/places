@@ -72,7 +72,7 @@ $ redis-server --port 6379
 Then generate the client (run from root of this project, not the client directory):
 ```bash
 $ poetry run uvicorn service:app --reload
-$ openapi-generator generate -i http://localhost:8000/openapi.json -g typescript-fetch -o my-places/src/api
+$ openapi-generator generate -i http://localhost:8000/openapi.json -g typescript-fetch -o my-places/src/ api
 ```
 
 ## Install Dependencies and Run:

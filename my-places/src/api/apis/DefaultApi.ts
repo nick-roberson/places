@@ -24,7 +24,7 @@ import type {
   Name,
   Place,
   PlaceInsertModel,
-  ResponseGetOneGetNameGet,
+  ResponseGetOneGetGet,
 } from '../models/index';
 import {
     APIKeyFromJSON,
@@ -45,8 +45,8 @@ import {
     PlaceToJSON,
     PlaceInsertModelFromJSON,
     PlaceInsertModelToJSON,
-    ResponseGetOneGetNameGetFromJSON,
-    ResponseGetOneGetNameGetToJSON,
+    ResponseGetOneGetGetFromJSON,
+    ResponseGetOneGetGetToJSON,
 } from '../models/index';
 
 export interface AddAddPostRequest {
@@ -63,18 +63,22 @@ export interface AddManyAddManyPostRequest {
 }
 
 export interface DeleteDeletePostRequest {
-    placeId: string;
+    placeIdOrName: string;
 }
 
 export interface DeleteManyDeleteManyPostRequest {
     requestBody: Array<string>;
 }
 
+export interface GetAllAllGetRequest {
+    force?: any;
+}
+
 export interface GetCommentsCommentsGetGetRequest {
     placeId: any;
 }
 
-export interface GetOneGetNameGetRequest {
+export interface GetOneGetGetRequest {
     name: any;
     exact?: any;
 }
@@ -210,14 +214,14 @@ export class DefaultApi extends runtime.BaseAPI {
      * Delete
      */
     async deleteDeletePostRaw(requestParameters: DeleteDeletePostRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<any>> {
-        if (requestParameters.placeId === null || requestParameters.placeId === undefined) {
-            throw new runtime.RequiredError('placeId','Required parameter requestParameters.placeId was null or undefined when calling deleteDeletePost.');
+        if (requestParameters.placeIdOrName === null || requestParameters.placeIdOrName === undefined) {
+            throw new runtime.RequiredError('placeIdOrName','Required parameter requestParameters.placeIdOrName was null or undefined when calling deleteDeletePost.');
         }
 
         const queryParameters: any = {};
 
-        if (requestParameters.placeId !== undefined) {
-            queryParameters['place_id'] = requestParameters.placeId;
+        if (requestParameters.placeIdOrName !== undefined) {
+            queryParameters['place_id_or_name'] = requestParameters.placeIdOrName;
         }
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -285,11 +289,15 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get all restaurants.
+     * Get all restaurants. Only use force if you want to bypass the cache.
      * Get All
      */
-    async getAllAllGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<any>> {
+    async getAllAllGetRaw(requestParameters: GetAllAllGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<any>> {
         const queryParameters: any = {};
+
+        if (requestParameters.force !== undefined) {
+            queryParameters['force'] = requestParameters.force;
+        }
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -308,11 +316,11 @@ export class DefaultApi extends runtime.BaseAPI {
     }
 
     /**
-     * Get all restaurants.
+     * Get all restaurants. Only use force if you want to bypass the cache.
      * Get All
      */
-    async getAllAllGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<any> {
-        const response = await this.getAllAllGetRaw(initOverrides);
+    async getAllAllGet(requestParameters: GetAllAllGetRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<any> {
+        const response = await this.getAllAllGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -388,12 +396,16 @@ export class DefaultApi extends runtime.BaseAPI {
      * Get one restaurant by name  Args:     name (str): Name of the restaurant to get     exact (bool, optional): Exact match for name. Defaults to False.
      * Get One
      */
-    async getOneGetNameGetRaw(requestParameters: GetOneGetNameGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResponseGetOneGetNameGet>> {
+    async getOneGetGetRaw(requestParameters: GetOneGetGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ResponseGetOneGetGet>> {
         if (requestParameters.name === null || requestParameters.name === undefined) {
-            throw new runtime.RequiredError('name','Required parameter requestParameters.name was null or undefined when calling getOneGetNameGet.');
+            throw new runtime.RequiredError('name','Required parameter requestParameters.name was null or undefined when calling getOneGetGet.');
         }
 
         const queryParameters: any = {};
+
+        if (requestParameters.name !== undefined) {
+            queryParameters['name'] = requestParameters.name;
+        }
 
         if (requestParameters.exact !== undefined) {
             queryParameters['exact'] = requestParameters.exact;
@@ -402,21 +414,21 @@ export class DefaultApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/get/{name}`.replace(`{${"name"}}`, encodeURIComponent(String(requestParameters.name))),
+            path: `/get`,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ResponseGetOneGetNameGetFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ResponseGetOneGetGetFromJSON(jsonValue));
     }
 
     /**
      * Get one restaurant by name  Args:     name (str): Name of the restaurant to get     exact (bool, optional): Exact match for name. Defaults to False.
      * Get One
      */
-    async getOneGetNameGet(requestParameters: GetOneGetNameGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResponseGetOneGetNameGet> {
-        const response = await this.getOneGetNameGetRaw(requestParameters, initOverrides);
+    async getOneGetGet(requestParameters: GetOneGetGetRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ResponseGetOneGetGet> {
+        const response = await this.getOneGetGetRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

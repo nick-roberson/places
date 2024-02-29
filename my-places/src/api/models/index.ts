@@ -18,6 +18,6 @@ export * from './PlusCode';
 export * from './PriceLevel';
 export * from './Rating';
 export * from './ReservationUrl';
-export * from './ResponseGetOneGetNameGet';
+export * from './ResponseGetOneGetGet';
 export * from './ValidationError';
 export * from './Viewport';

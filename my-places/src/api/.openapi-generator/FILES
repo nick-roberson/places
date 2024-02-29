@@ -19,7 +19,7 @@ models/PlusCode.ts
 models/PriceLevel.ts
 models/Rating.ts
 models/ReservationUrl.ts
-models/ResponseGetOneGetNameGet.ts
+models/ResponseGetOneGetGet.ts
 models/ValidationError.ts
 models/Viewport.ts
 models/index.ts

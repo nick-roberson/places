@@ -69,18 +69,18 @@ class RestaurantManager:
 
     def drop_by_name(self, name: str) -> None:
         """Drop a restaurant by name"""
-        logger.info(f"Dropping {name} from {self.collection_name}")
-        self.collection.delete_one({"name": name})
+        self.collection.delete_many({"name": name})
+        logger.info(f"Dropped {name} from {self.collection_name}")
 
     def drop_by_place_id(self, place_id: str) -> None:
         """Drop a restaurant by place_id"""
-        logger.info(f"Dropping {place_id} from {self.collection_name}")
-        self.collection.delete_one({"place_id": place_id})
+        self.collection.delete_many({"place_id": place_id})
+        logger.info(f"Dropped {place_id} from {self.collection_name}")
 
     def drop_by_id(self, id: str) -> None:
         """Drop a restaurant by id"""
-        logger.info(f"Dropping {id} from {self.collection_name}")
-        self.collection.delete_one({"id": id})
+        self.collection.delete_many({"id": id})
+        logger.info(f"Dropped {id} from {self.collection_name}")
 
     ########################################################
     # Insert                                               #
