@@ -16,14 +16,6 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-def configure_logging():
-    level = logging.DEBUG if os.environ.get("LOG_VERBOSE") is None else logging.INFO
-    logging.basicConfig(
-        level=level,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
-
-
 @router.post("/delete")
 def delete(place_id: str, name: str) -> Response:
     """Simple, delete single place."""

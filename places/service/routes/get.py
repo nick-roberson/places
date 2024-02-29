@@ -18,7 +18,8 @@ from typing import List, Optional
 # Places Code
 from places.manager import get_manager
 from places.models import Place, APIKey
-from places.utils.cache import places_cache
+from places.cache.cache import places_cache
+from constants import GOOGLE_API_KEY
 
 # Constants
 manager = get_manager()
@@ -121,4 +122,4 @@ def search(
 @router.get("/keys/google")
 def get_google_api_key() -> APIKey:
     """Get the Google api key."""
-    return APIKey(key=os.environ.get("GOOGLE_API_KEY"))
+    return APIKey(key=GOOGLE_API_KEY)

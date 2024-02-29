@@ -1,22 +1,16 @@
 import pymongo
 import sys
-import os
 import uuid
 import logging
 
+# Third Party
 from typing import List
+
+# Places Code
 from places.models import Place, CommentModel
+from constants import MONGO_URI
 
-MONGO_URI = os.environ.get("MONGO_URI")
-logging.basicConfig(
-    level=logging.DEBUG if os.environ.get("LOG_VERBOSE") is None else logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
 logger = logging.getLogger(__name__)
-
-###################################################################
-# Utility Functions                                               #
-###################################################################
 
 # Singleton manager class
 _MANAGER_SINGLETON = None
