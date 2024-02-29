@@ -77,9 +77,9 @@ class Place(BaseModel):
         # Processed fields
         data["reservation_url"] = None
         if data["place_id"] and data["name"]:
-            data[
-                "reservation_url"
-            ] = f"https://www.google.com/maps/place/?q=place_id:{data['place_id']}"
+            data["reservation_url"] = (
+                f"https://www.google.com/maps/place/?q=place_id:{data['place_id']}"
+            )
 
         super().__init__(**data)
 
