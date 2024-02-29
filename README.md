@@ -79,7 +79,5 @@ $ openapi-generator generate -i http://localhost:8000/openapi.json -g typescript
 
 Ensure that you have all the necessary dependencies installed:
 ```bash
-$ cd my-places
-$ npm install
-$ npm run start
+$ cd my-places && npm install && npm run start
 ```

@@ -155,6 +155,7 @@ const MyPlaces = () => {
     };
 
     // vars and functions for adding new places
+    const [accordionExpanded, setAccordionExpanded] = useState<boolean>(false);
     const [newPlaceName, setNewPlaceName] = useState<string>('');
     const [newPlaceLocation, setNewPlaceLocation] = useState<string>('');
     const addPlace = () => {
@@ -167,6 +168,13 @@ const MyPlaces = () => {
             apiClient.addAddPostRaw({ name: newPlaceName, location: newPlaceLocation }).then((response) => {
                 console.log('Added place', response);
                 refreshPlaces(true);
+
+                // Clear the input fields
+                setNewPlaceName('');
+                setNewPlaceLocation('');
+
+                // Collapse the accordion
+                setAccordionExpanded(false);
             });
         } catch (error) {
             console.error('Error adding place', error);
@@ -204,10 +212,6 @@ const MyPlaces = () => {
                 row.name !== null &&
                 row.name.toLowerCase().includes(trimmed_search)
             )
-            // || (
-            //    row.formattedAddress !== null &&
-            //    row.formattedAddress.toLowerCase().includes(trimmed_search)
-            //)
         ));
     };
 
@@ -286,7 +290,10 @@ const MyPlaces = () => {
 
                     {/* Dialog for adding places */}
                     <Grid xs={4}>
-                        <Accordion>
+                        <Accordion
+                            expanded={accordionExpanded}
+                            onChange={(event, expanded) => setAccordionExpanded(expanded)}
+                        >
                             <AccordionSummary
                                 expandIcon={<MenuIcon />}
                                 aria-controls="panel1a-content"
@@ -312,6 +319,7 @@ const MyPlaces = () => {
                             </AccordionDetails>
                         </Accordion>
                     </Grid>
+                    
                     {/* Display message */}
                     <Grid xs={4}>
                         <Alert severity="info">
@@ -328,8 +336,12 @@ const MyPlaces = () => {
 
                     {/* Input text bar for searching and filtering */}
                     <Grid xs={12}>
-                        <Input placeholder="Search by name and location here ..." onChange={(event) => updateSearch(event.target.value)} />
+                        <Input 
+                            placeholder="Search by name and location here ..." 
+                            onChange={(event) => updateSearch(event.target.value)}
+                        />
                     </Grid>
+
                     {/* DataGrid of all places pull from API */}
                     <Grid xs={9}>
                         <DataGrid
