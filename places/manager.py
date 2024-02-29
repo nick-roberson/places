@@ -24,7 +24,7 @@ _MANAGER_SINGLETON = None
 
 def get_manager():
     global _MANAGER_SINGLETON
-    if not _MANAGER_SINGLETON:
+    if _MANAGER_SINGLETON is None:
         _MANAGER_SINGLETON = RestaurantManager()
     return _MANAGER_SINGLETON
 

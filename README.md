@@ -48,13 +48,21 @@ export GOOGLE_MAPS_API_KEY="<api_key>"
 # Back End
 
 ## Install Dependencies and Run:
+
 Ensure that you have all the necessary dependencies installed:
 ```bash
 $ poetry install
 ```
+
 Run the server from directory root:
 ```bash
 $ poetry run uvicorn service:app --reload
+```
+
+Start the cache server from directory root with redis installed and running:
+```bash
+$ brew install redis
+$ redis-server --port 6379
 ```
 
 # Front End

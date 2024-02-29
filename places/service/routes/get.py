@@ -18,6 +18,7 @@ from typing import List, Optional
 # Places Code
 from places.manager import get_manager
 from places.models import Place, APIKey
+from places.utils.cache import places_cache
 
 # Constants
 manager = get_manager()
@@ -48,8 +49,22 @@ def get_one(name: str, exact: bool = False) -> Optional[Place]:
         name (str): Name of the restaurant to get
         exact (bool, optional): Exact match for name. Defaults to False.
     """
+    # First check the cache
+    cached_entry = places_cache.get(name)
+    if cached_entry:
+        logger.info(f"Getting {name} from cache")
+        return cached_entry
+
+    # If not in cache then get from manager
     logger.info(f"Getting {name}")
-    return manager.get(name=name, exact=exact)
+    entry = manager.get(name=name, exact=exact)
+
+    # Add to cache
+    if entry:
+        places_cache.set(name, entry)
+
+    # Return
+    return entry
 
 
 @router.get("/search")

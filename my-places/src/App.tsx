@@ -13,7 +13,6 @@ import Alert from '@mui/material/Alert';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Accordion from '@mui/material/Accordion';
@@ -24,6 +23,10 @@ import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
+
+// Icons
+import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from '@mui/material/IconButton';
 
 // Complex imports
 import { DataGrid, GridToolbar, GridColDef, GridEventListener} from '@mui/x-data-grid';
@@ -92,6 +95,9 @@ function renderCommentsCards(place: any) {
                                     </React.Fragment>
                                 }
                             />
+                            <IconButton edge="end" aria-label="delete">
+                                <DeleteIcon />
+                            </IconButton>
                         </ListItem>
                         <Divider variant="inset" component="li" />
                     </div>
@@ -183,17 +189,26 @@ const MyPlaces = () => {
     // Function to update the search
     const updateSearch = (search: string) => {
         // If we are not searching, show all rows
-        if (search === '') {
+        if (search === '' || search === null) {
             setRows(places);
             return;
         }
 
         // Else filter the rows
-        const new_rows = rows.filter((row) =>
-            row.name.toLowerCase().includes(search.toLowerCase())
-            || row.formattedAddress.toLowerCase().includes(search.toLowerCase())
-        );
-        setRows(new_rows);
+        console.log('Updating search', search)
+        let trimmed_search = search.trim().toLowerCase();
+
+        // Set rows equal to filtered rows
+        setRows(rows.filter((row) =>
+            (
+                row.name !== null &&
+                row.name.toLowerCase().includes(trimmed_search)
+            )
+            // || (
+            //    row.formattedAddress !== null &&
+            //    row.formattedAddress.toLowerCase().includes(trimmed_search)
+            //)
+        ));
     };
 
     // Initialize your API client with the base URL
@@ -335,11 +350,11 @@ const MyPlaces = () => {
                     <Grid xs={3}>
 
                         <div><h2>Comments</h2></div>
+
                         <Divider textAlign="center" component="div" >Your comments</Divider>
-
                         <div>{renderCommentsCards(selectedRow)}</div>
-                        <Divider textAlign="center">Add new comment</Divider>
 
+                        <Divider textAlign="center">Add new comment</Divider>
                         <div>
                             <Grid container spacing={2}>
                                 <Grid xs={6}>
