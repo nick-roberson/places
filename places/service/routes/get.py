@@ -26,22 +26,30 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.get("/")
-def read_root() -> Response:
-    content = {
-        "message": "Welcome to Nick's restaurant service!",
-    }
-    return Response(status_code=200, content=content)
-
-
 @router.get("/all")
-def get_all() -> List[Place]:
-    """Get all restaurants."""
-    logging.info("Getting all")
-    return manager.get_all()
+def get_all(force: bool = True) -> List[Place]:
+    """Get all restaurants. Only use force if you want to bypass the cache."""
+    # If force is not set then check the cache
+    if not force:
+        cached_entry = places_cache.get_places("all")
+        if cached_entry:
+            logger.info(f"Getting all places from cache")
+            return cached_entry
+
+    # If not in cache then get from manager directly
+    logger.info(f"Getting all places from DB")
+    all_places = manager.get_all()
+
+    # Update the cache as we go then
+    if all_places:
+        logger.info(f"Updating all places in cache")
+        places_cache.set_places("all", all_places)
+
+    # Return
+    return all_places
 
 
-@router.get("/get/{name}")
+@router.get("/get")
 def get_one(name: str, exact: bool = False) -> Optional[Place]:
     """Get one restaurant by name
 
@@ -50,18 +58,19 @@ def get_one(name: str, exact: bool = False) -> Optional[Place]:
         exact (bool, optional): Exact match for name. Defaults to False.
     """
     # First check the cache
-    cached_entry = places_cache.get(name)
+    cached_entry = places_cache.get_place(name)
     if cached_entry:
         logger.info(f"Getting {name} from cache")
         return cached_entry
 
     # If not in cache then get from manager
-    logger.info(f"Getting {name}")
+    logger.info(f"Getting {name} from DB")
     entry = manager.get(name=name, exact=exact)
 
     # Add to cache
     if entry:
-        places_cache.set(name, entry)
+        logger.info(f"Updating {name} in cache")
+        places_cache.set_place(name, entry)
 
     # Return
     return entry
@@ -86,10 +95,27 @@ def search(
         logger.error("Please provide a name or address or min_rating")
         return []
 
+    # Check the cache, using a dict to store the search parameters and hashing it as the key
+    search_params = {"name": name, "address": address, "min_rating": min_rating}
+    search_key = hash(str(search_params))
+    cached_entry = places_cache.get_places(search_key)
+    if cached_entry:
+        logger.info(f"Getting search results from cache")
+        return cached_entry
+
+    # If not in cache then get from manager
     logger.info(f"Searching for {name} at {address} with min rating {min_rating}")
-    return manager.search(
+    results = manager.search(
         name=name, address=address, min_rating=min_rating, exact=exact
     )
+
+    # Add to cache
+    if results:
+        logger.info(f"Updating search results in cache")
+        places_cache.set_places(search_key, results)
+
+    # Return
+    return results
 
 
 @router.get("/keys/google")
