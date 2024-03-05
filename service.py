@@ -18,27 +18,39 @@ from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 # Places Code
-from places.manager import RestaurantManager
+from places.service.places.manager import PlacesManager
 
-# Places Routers
-from places.service.routes.add import router as add_routes
-from places.service.routes.remove import router as delete_routes
-from places.service.routes.get import router as get_routes
-from places.service.routes.comments import router as comments_routes
+# Places Routes
+from places.service.places.routes.add import router as add_routes
+from places.service.places.routes.remove import router as delete_routes
+from places.service.places.routes.get import router as get_routes
 
-# Initialize FastAPI app and allow CORS
+# Comments Routes
+from places.service.comments.routes.comments import router as comments_routes
+
+# Initialize FastAPI App
 app = FastAPI()
-app.add_middleware(CORSMiddleware, allow_origins=["*"])
 
-# Initialize manager and logger
-manager = RestaurantManager()
-logger = logging.getLogger(__name__)
-
-# Add routes for requests
+# Add Places Endpoints
 app.include_router(add_routes)
 app.include_router(delete_routes)
 app.include_router(get_routes)
+
+# Add Comments Endpoints
 app.include_router(comments_routes)
+
+# Allow CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Initialize manager and logger
+manager = PlacesManager()
+logger = logging.getLogger(__name__)
 
 
 def configure_logging(level: int = logging.INFO):

@@ -1,13 +1,11 @@
 // Standard
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 // Third Party
 import Input from '@mui/joy/Input';
 
 import Grid from '@mui/system/Unstable_Grid';
-
-import MenuIcon from '@mui/icons-material/Menu';
 
 import Alert from '@mui/material/Alert';
 import AppBar from '@mui/material/AppBar';
@@ -22,69 +20,57 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
 
 // Icons
 import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
+import MenuIcon from '@mui/icons-material/Menu';
+import SearchIcon from '@mui/icons-material/Search';
 
 // Complex imports
 import { DataGrid, GridToolbar, GridColDef, GridEventListener} from '@mui/x-data-grid';
-import { BarChart } from '@mui/x-charts/BarChart';
 
 // My imports
 import { Configuration } from './api';
 import { DefaultApi } from './api/apis';
-import { Place } from './api/models/Place';
-import fetchApiKey from "./components/google_api_key"
-import { render } from '@testing-library/react';
+import { Place, PlaceFromJSONTyped} from './api/models/Place';
+import { CommentsModel } from './api/models/CommentsModel';
 
 
-const renderDetailsButton = (params: any) => {
+const renderSearchIcon = (params: any) => {
+    // Render the search Icon in the table
     return (
-        <strong>
-            <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                style={{ marginLeft: 4 }}
-                onClick={() => window.open(params.row.reservation_url, '_blank')}
-            >
-                Lookup
-            </Button>
-        </strong>
+        <IconButton edge="end" aria-label="search">
+            <SearchIcon
+                onClick={() => {
+                    console.log('Searching for', params.row.name)
+                    window.open(params.row.reservation_url, '_blank');
+                }
+                }
+            />
+        </IconButton>
     )
 }
 
-const renderCommentsCell = (params: any) => {
-    // If comments are present, get the number of comments
-    let num_comments = 0
-    if (params.row.comments) {
-        num_comments = params.row.comments.length
-    }
-    // Return the button with the number of comments
-    return (
-        <strong>
-            {num_comments} Comments
-        </strong>
-    )
-}
-
-const renderDeleteButton = (params: any) => {
+const renderDeleteIcon = (params: any) => {
+    // Render the delete Icon in the table
     return (
         <strong>
             <IconButton edge="end" aria-label="delete">
                 <DeleteIcon
                     onClick={() => {
                         console.log('Deleting', params.row.name)
+
                         // Init Client 
                         const configuration = new Configuration({
                             basePath: "http://localhost:8000",
                         });
                         const api = new DefaultApi(configuration);
+
                         // Delete the place
                         try {
-                            api.deleteDeletePost({ placeIdOrName: params.row.name }).then((response) => {
+                            const body = { placeId: '', name: params.row.name }
+                            api.deleteDeletePost(body).then((response) => {
                                 console.log('Deleted place', response);
                             });
                         } catch (error) {
@@ -98,24 +84,32 @@ const renderDeleteButton = (params: any) => {
     )
 }
 
-function renderCommentsCards(place: any) {
+function renderCommentsCards(comments: CommentsModel | null) {
+    console.log('Calling renderCommentsCards on: ', comments)
+
     // check that place is not null
-    if (!place) {
+    if (!comments) {
         return <div>No Comments</div>
     }
 
     // check that comments are not null
-    if (!place.comments) {
+    if (!comments.comments) {
         return <div>No Comments</div>
     }
+
+    // shorten the created at date for all comments 
+    comments.comments.forEach((comment: any) => {
+        comment.created_at = comment.created_at.substring(0, 10);
+    });
 
     // render the comments
     return (
         <div>
             <List sx={{ maxHeight: '50vh', overflow: 'auto'}}>
-                {place.comments.map((comment: any) => (
+                {comments.comments.map((comment: any) => (
                     <div>
                         <ListItem alignItems="flex-start">
+
                             <ListItemText
                                 primary={comment.created_at}
                                 secondary={
@@ -124,11 +118,32 @@ function renderCommentsCards(place: any) {
                                     </React.Fragment>
                                 }
                             />
+
                             <IconButton edge="end" aria-label="delete">
-                                <DeleteIcon />
+                                <DeleteIcon 
+                                    onClick={() => {
+                                        console.log('Deleting comment', comment.comment_id)
+
+                                        // Init Client 
+                                        const configuration = new Configuration({
+                                            basePath: "http://localhost:8000",
+                                        });
+                                        const api = new DefaultApi(configuration);
+
+                                        // Delete the comment
+                                        try {
+                                            api.deleteCommentCommentsDeletePost({commentId: comment.comment_id}).then((response) => {
+                                                console.log('Deleted comment', response);
+                                            });
+                                        } catch (error) {
+                                            console.error('Error deleting comment', error);
+                                        }
+                                    }
+                                }
+                                />
                             </IconButton>
+
                         </ListItem>
-                        <Divider variant="inset" component="li" />
                     </div>
                 ))}
             </List>
@@ -136,23 +151,52 @@ function renderCommentsCards(place: any) {
     )
 };
 
+const renderSelectedPlace = (selectedRow: Place | null) => {
+    console.log('Calling renderSelectedPlace on: ', selectedRow)
+    if (!selectedRow) {
+        return <div>No Place Selected</div>
+    }
+    const place = PlaceFromJSONTyped(selectedRow, false);
+    return (
+        <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
+            <ListItem>
+                <ListItemText primary="Name" secondary={place.name} />
+            </ListItem>
+            <ListItem>
+                <ListItemText primary="Address" secondary={place.formattedAddress} />
+            </ListItem>
+            <ListItem>
+                <ListItemText primary="Business Status" secondary={place.businessStatus} />
+            </ListItem>
+            <ListItem>
+                <ListItemText primary="Rating" secondary={place.rating?.toString()} />
+            </ListItem>
+        </List>
+    )
+}
+
 
 // Define the component
 const MyPlaces = () => {
 
     // Create a state to store the API client
     const [apiClient, setApiClient] = useState<DefaultApi | null>(null);
-    const [apiKey, setApiKey] = useState<string>('');
 
     // Create rows and columns for Data GridColDef
     const [places, setPlaces] = useState<Place[]>([]);
     const [rows, setRows] = useState<Place[]>([]);
     const [columns, setColumns] = useState<GridColDef[]>([]);
 
+    // Selected row in the table
+    const [selectedRow, setSelectedRow] = useState<Place | null>(null);
+    const [loadedComments, setLoadedComments] = useState<CommentsModel>({comments: []});
+    const [message, setMessage] = useState<string>('');
+
     // Create state for new comments and add comment function
     const [newComment, setNewComment] = useState<string>('');
     const addComment = () => {
-        console.log('Adding a new comment', newComment);
+
+        // Check that the API client is initialized and a place is selected
         if (!apiClient) {
             console.log('API client not initialized yet, not adding');
             return;
@@ -166,16 +210,21 @@ const MyPlaces = () => {
             return;
         }
 
-        console.log("Adding comment to place", selectedRow?.placeId, newComment)
+        // Add new comment
+        console.log("Adding comment to place", selectedRow.id, newComment)
         try {
             apiClient.addCommentCommentsAddPost({
                 commentInsertModel: {
-                    placeId: selectedRow?.placeId,
+                    placeId: selectedRow.id,
                     text: newComment,
                 }
             }).then((response) => {
+                // Log the response and reload the comments
                 console.log('Added comment', response);
-                refreshPlaces(true);
+                apiClient.getCommentsCommentsGetGet({placeId: selectedRow.id}).then((comments: CommentsModel) => {
+                    console.log('Loaded comments', comments);
+                    setLoadedComments(comments);
+                });
             });
         } catch (error) {
             console.error('Error adding comment', error);
@@ -187,6 +236,7 @@ const MyPlaces = () => {
     const [accordionExpanded, setAccordionExpanded] = useState<boolean>(false);
     const [newPlaceName, setNewPlaceName] = useState<string>('');
     const [newPlaceLocation, setNewPlaceLocation] = useState<string>('');
+
     const addPlace = () => {
         console.log('Adding a new place', newPlaceName, newPlaceLocation);
         if (!apiClient) {
@@ -211,16 +261,29 @@ const MyPlaces = () => {
         }
     };
 
-    // Selected row in the table
-    const [selectedRow, setSelectedRow] = useState<Place | null>(null);
-    const [message, setMessage] = useState<string>('');
     const rowClickEvent: GridEventListener<'rowClick'> = (
       params, // GridRowParams
       event, // MuiEvent<React.MouseEvent<HTMLElement>>
       details, // GridCallbackDetails
     ) => {
+        // Set the selected row
         console.log(`Location "${params.row.name}" clicked`);
         setSelectedRow(params.row);
+        
+        // Load the comments 
+        if (!apiClient) {
+            console.log('API client not initialized yet, not loading comments')
+            return;
+        }
+        if (!params.row.id) {
+            console.log('No place selected, not loading comments')
+            return;
+        }
+        apiClient.getCommentsCommentsGetGet({placeId: params.row.id}).then((comments: CommentsModel) => {
+            console.log('Loaded comments', comments);
+            setLoadedComments(comments);
+        });
+
     };
 
     // Function to update the search
@@ -273,20 +336,16 @@ const MyPlaces = () => {
             setColumns([
                 // Add fields for basic information
                 { field: 'name', headerName: 'Name', width: 250},
-                { field: 'business_status', headerName: 'Status', width: 130 },
-                { field: 'formatted_address', headerName: 'Address', width: 300 },
-                { field: 'rating', headerName: 'Avg Rating', width: 80 },
-                { field: 'user_ratings_total', headerName: 'Total Ratings', width: 80 },
-                { field: 'price_level', headerName: 'Price Level', width: 80 },
+                { field: 'business_status', headerName: 'Status', width: 150 },
+                { field: 'formatted_address', headerName: 'Address', width: 400 },
+                { field: 'rating', headerName: 'Avg Rating', width: 100 },
+                { field: 'user_ratings_total', headerName: 'Total Ratings', width: 100 },
+                { field: 'price_level', headerName: 'Price', width: 100 },
 
                 // Add field for link our to google reservations
-                { field: 'reservation_url', headerName: 'Reservations', width: 100, renderCell: renderDetailsButton },
-
-                // Add field for comments summary
-                { field: 'comments', headerName: 'Comments', width: 100, renderCell: renderCommentsCell },
-
+                { field: 'reservation_url', headerName: 'Search', width: 100, renderCell: renderSearchIcon },
                 // Add field for delete button
-                { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteButton },
+                { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteIcon },
             ]);
         });
     };
@@ -395,24 +454,38 @@ const MyPlaces = () => {
                             slots={{ toolbar: GridToolbar }}
                         />
                     </Grid>
+                    
                     <Grid xs={3}>
 
-                        <div><h2>Comments</h2></div>
+                        <Divider textAlign="center">Information</Divider>
+
+                        {
+                            selectedRow ? 
+                                renderSelectedPlace(selectedRow) : 
+                                "None Selected"
+                        }
 
                         <Divider textAlign="center" component="div" >Your comments</Divider>
-                        <div>{renderCommentsCards(selectedRow)}</div>
+
+                        {
+                            selectedRow ? 
+                                renderCommentsCards(loadedComments) :
+                                '...'
+                        }
 
                         <Divider textAlign="center">Add new comment</Divider>
+
                         <div>
-                            <Grid container spacing={2}>
-                                <Grid xs={6}>
+                            <Grid container spacing={2} m={2}>
+                                <Grid xs={9}>
                                     <Input placeholder="New Comment ..." onChange={(event) => setNewComment(event.target.value)} />
                                 </Grid>
-                                <Grid xs={6}>
-                                    <Button variant="contained" color="primary" onClick={() => addComment()}>Add Comment </Button>
+                                <Grid xs={3}>
+                                    <Button variant="contained" color="primary" onClick={() => addComment()}>Add</Button>
                                 </Grid>
                             </Grid>
                         </div>
+
                     </Grid>
                 </Grid>
             </Box>

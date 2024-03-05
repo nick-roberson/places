@@ -43,9 +43,7 @@ class Place(BaseModel):
     """Place model"""
 
     # Required fields
-    id: Optional[str] = None
-
-    # Required fields
+    id: str
     business_status: str
     formatted_address: str
     geometry: Geometry
@@ -65,7 +63,6 @@ class Place(BaseModel):
 
     # Processed fields
     reservation_url: Optional[str] = None
-    comments: Optional[List[Dict]] = []
 
     def __init__(self, **data):
         """Ensure that all fields are set, allow none accounting for messy data."""
@@ -77,9 +74,9 @@ class Place(BaseModel):
         # Processed fields
         data["reservation_url"] = None
         if data["place_id"] and data["name"]:
-            data["reservation_url"] = (
-                f"https://www.google.com/maps/place/?q=place_id:{data['place_id']}"
-            )
+            data[
+                "reservation_url"
+            ] = f"https://www.google.com/maps/place/?q=place_id:{data['place_id']}"
 
         super().__init__(**data)
 
@@ -88,20 +85,3 @@ class Place(BaseModel):
 
     def __repr__(self):
         return self.name
-
-
-class CommentInsertModel(BaseModel):
-    """Comment model passed on insert to the database"""
-
-    place_id: str
-    text: str
-
-
-class CommentModel(BaseModel):
-    """Comment model returned from the database"""
-
-    comment_id: str
-    place_id: str
-    text: str
-    created_at: str
-    updated_at: str

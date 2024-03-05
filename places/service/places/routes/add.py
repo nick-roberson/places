@@ -8,8 +8,8 @@ from fastapi import HTTPException
 from typing import List, Dict
 
 # Places Code
-from places.manager import get_manager
-from places.models import Place, PlaceInsertModel
+from places.service.places.manager import get_manager
+from places.service.places.models import Place, PlaceInsertModel
 from places.google.google import get_restaurant_info
 
 # Constants
@@ -44,13 +44,13 @@ def add(
         )
 
     # if the place is already in the database, raise an error
-    existing = manager.get_by_place_id(new_place.place_id)
+    existing = manager.get_place_by_place_id(new_place.place_id)
     if existing:
         print(existing)
         logger.info(
             f"Already contains '{existing.name}' at '{existing.formatted_address}'"
         )
-        return manager.get_by_place_id(new_place.place_id)
+        return manager.get_place_by_place_id(new_place.place_id)
 
     new_place = manager.insert(new_place)
     logger.info(f"Inserted '{new_place}'")

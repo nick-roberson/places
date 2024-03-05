@@ -15,8 +15,8 @@ from fastapi import APIRouter
 from typing import List, Optional
 
 # Places Code
-from places.manager import get_manager
-from places.models import Place, APIKey
+from places.service.places.manager import get_manager
+from places.service.places.models import Place, APIKey
 from places.cache.cache import get_places_cache
 from constants import GOOGLE_API_KEY
 

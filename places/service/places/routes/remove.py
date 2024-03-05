@@ -8,7 +8,7 @@ from fastapi import HTTPException, Response
 from typing import List
 
 # Places Code
-from places.manager import get_manager
+from places.service.places.manager import get_manager
 
 # Constants
 manager = get_manager()

@@ -5,7 +5,7 @@ from typing import Dict, Union, List
 
 # Places Code
 from constants import REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_TTL_SECONDS
-from places.models import Place
+from places.service.places.models import Place
 
 redis_client = None
 places_cache = None

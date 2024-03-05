@@ -5,10 +5,10 @@ import sys
 import tabulate
 
 from places.google import seed as get_seed_data, get_restaurant_info
-from places.manager import RestaurantManager
+from places.service.places.manager import PlacesManager
 
 app = typer.Typer()
-manager = RestaurantManager()
+manager = PlacesManager()
 
 SEED_DATA = "/Users/nicholas/Code/sandbox_mongo_db/data/initial_places.json"
 
