@@ -377,7 +377,7 @@ const MyPlaces = () => {
                               <MenuIcon />
                             </IconButton>
                             <Typography variant="h6" color="inherit" component="div">
-                              Browse Saved Locations (DataGrid)
+                              My Places
                             </Typography>
                           </Toolbar>
                         </AppBar>
