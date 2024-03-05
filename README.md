@@ -20,12 +20,12 @@ Would be nice to add some integration that would allow me to more easily book re
 - Add a way to add a review to a place
 - Add a way to add a photo to a place
 - Add a way to add a reservation to a place
-- Add a remove button
+- (DONE) Add a remove button
 - Bulk import using CSV 
 
 **TODO v2:**
 - Add a way to add a place to a list (e.g. "Places to go in NYC")
-- Add a way to add notes to a place 
+- (DONE) Add a way to add notes to a place 
 - Recipe page for users that want to create a recipe book
 - Add a way to add a recipe to a place
 
