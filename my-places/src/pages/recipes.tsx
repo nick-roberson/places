@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 
 // Third Party
+import Icon from '@mui/material/Icon';
 import Input from '@mui/joy/Input';
 import Grid from '@mui/system/Unstable_Grid';
 import Alert from '@mui/material/Alert';
@@ -15,6 +16,8 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import { DataGrid, GridToolbar, GridColDef} from '@mui/x-data-grid';
+import { createSvgIcon } from '@mui/material/utils';
+import Stack from '@mui/material/Stack';
 
 // My imports
 import { Configuration } from '../api';
@@ -23,7 +26,22 @@ import { RecipeModel } from '../api';
 import { Ingredient } from '../api';
 import { Instruction } from '../api';
 import { Note } from '../api';
+import { Divider, IconButton } from '@mui/material';
 
+
+const PlusIcon = createSvgIcon(
+    // credit: plus icon from https://heroicons.com/
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="currentColor"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    </svg>,
+    'Plus',
+);
 
 // DataGrid columns for ingredients, instructions, and notes
 const ingredientCols: GridColDef[] = [
@@ -179,48 +197,15 @@ const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
             {/* Display the ingredients  as a list */}
             {
                 recipe.ingredients ? (
-                    <Accordion expanded={true}>
-                        <AccordionSummary>
-                            Ingredients
-                        </AccordionSummary>
+                    <Box>
 
-                        <AccordionDetails>
-                            <DataGrid
-                                rows={ingredientRows}
-                                columns={ingredientCols}
-                                initialState={
-                                    {
-                                        pagination: {
-                                            paginationModel: { page: 0, pageSize: 10 },
-                                        },
-                                    }
-                                }
-                                pageSizeOptions={[10, 20]}
-                                slots={{ toolbar: GridToolbar }}
-                            />
-                            <Button 
-                                variant="contained"
-                                color="primary"
-                                onClick={() => 
-                                    ingredientRows.push({
-                                        id: ingredientRows.length,
-                                        name: "New Ingredient",
-                                        quantity: "1",
-                                        measurement: "cup",
-                                        preparation: "none",
-                                    })
-                                }>Add Ingredient
-                            </Button>  
-
-                            
-                        </AccordionDetails>
-
+                        <h3>Ingredients</h3>
                         <Grid container spacing={2}  m={.5}>
-                            <Grid xs={2} m={.5}><Input id="new-ingredient-name" placeholder="Name"/></Grid>
-                            <Grid xs={2} m={.5}><Input id="new-ingredient-quantity" placeholder="Quantity" /></Grid>
-                            <Grid xs={2} m={.5}><Input id="new-ingredient-measurement" placeholder="Measurement" /></Grid>
-                            <Grid xs={3} m={.5}><Input id="new-ingredient-preparation" placeholder="Preparation" /></Grid>
-                            <Grid xs={2} m={.5}>
+                            <Grid xs={2} m={.25}><Input id="new-ingredient-name" placeholder="Name"/></Grid>
+                            <Grid xs={2} m={.25}><Input id="new-ingredient-quantity" placeholder="Quantity" /></Grid>
+                            <Grid xs={2} m={.25}><Input id="new-ingredient-measurement" placeholder="Measurement" /></Grid>
+                            <Grid xs={3} m={.25}><Input id="new-ingredient-preparation" placeholder="Preparation" /></Grid>
+                            <Grid xs={2} m={.25}>
                                 <Button 
                                     variant="contained"
                                     color="primary"
@@ -229,14 +214,29 @@ const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
                             </Grid>
                         </Grid>
 
-                    </Accordion>
+                        <DataGrid
+                            rows={ingredientRows}
+                            columns={ingredientCols}
+                            initialState={
+                                {
+                                    pagination: {
+                                        paginationModel: { page: 0, pageSize: 10 },
+                                    },
+                                }
+                            }
+                            pageSizeOptions={[10, 20]}
+                            slots={{ toolbar: GridToolbar }}
+                        />
+                    </Box>
                 ) : "No ingredients yet."
             }
+
+            <Divider />
 
             {/* Display the instructions as a list */}
             {
                 recipe.instructions ? (
-                    <Accordion expanded={true}>
+                    <Accordion>
                         <AccordionSummary>
                             Instructions
                         </AccordionSummary>
@@ -272,10 +272,12 @@ const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
                 ) : "No instructions yet."
             }
 
+            <Divider/>
+
             {/* Display the notes as a list */}
             {
                 recipe.notes ? (
-                    <Accordion expanded={true}>
+                    <Accordion>
                         <AccordionSummary>
                             Notes
                         </AccordionSummary>
@@ -343,6 +345,29 @@ export function MyRecipes() {
 
     }, []);
 
+    // Function to add a new recipe
+    const addRecipe = async (apiClient: DefaultApi | null) => {
+        if (!apiClient) {
+            throw new Error("No API client");
+        }
+        const newRecipe = {
+            name: "New Recipe",
+            description: "New Description",
+            source: "New Source",
+        };
+        const response = await apiClient.addRecipeRecipesAddPost({ recipeModel: newRecipe });
+        return response;
+    }
+
+    // Function to refresh the recipes
+    const refreshRecipes = async (apiClient: DefaultApi | null) => {
+        if (!apiClient) {
+            throw new Error("No API client");
+        }
+        const recipes = await getRecipes(apiClient);
+        setAllRecipes(recipes);
+    }
+
     return (
         <div>
             <Grid container spacing={2}>
@@ -350,9 +375,20 @@ export function MyRecipes() {
                 {/* Display the recipes in a toolbar on the left */}
                 <Grid xs={2} m={2}>
                     <Box>
-                        <Typography variant="h4" gutterBottom>
-                            Recipes
-                        </Typography>
+                        <Stack direction="row" spacing={3}>
+                            <Typography variant="h4" gutterBottom>
+                                Recipes
+                            </Typography>
+
+                            <Typography variant="h4" gutterBottom>
+                                <Button
+                                    onClick={() => addRecipe(apiClient).then((any) => refreshRecipes(apiClient))}
+                                >
+                                    <PlusIcon color="primary"/>
+                                </Button>
+                            </Typography>
+
+                        </Stack>
                         <List>
                             {allRecipes?.map((recipe) => (
                                 <ListItem>

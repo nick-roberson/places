@@ -1,11 +1,8 @@
 # Standard
 import logging
-import uuid
-import datetime
 
 # Third Party
 from fastapi import APIRouter
-from typing import List
 
 # Places Code
 from places.service.recipes.manager import get_manager as get_recipes_manager

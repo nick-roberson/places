@@ -96,7 +96,7 @@ class RecipeManager:
     # Add                                                  #
     ########################################################
 
-    def add(self, recipe: RecipeModel) -> RecipeModel:
+    def add_recipe(self, recipe: RecipeModel) -> RecipeModel:
         """Insert a recipe into the database.
         Args:
             recipe (RecipeModel): Recipe model
@@ -136,7 +136,9 @@ class RecipeManager:
 
             # Insert the recipe into the collection
             self.collection.insert_one(recipe.dict())
-            return recipe
+
+            # Pull the recipe from the collection
+            return self.collection.find_one({"id": recipe.id})
         except Exception as e:
             print(f"Error inserting {recipe.name}: {e}")
             return None

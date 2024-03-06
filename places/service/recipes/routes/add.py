@@ -1,12 +1,8 @@
 # Standard
 import logging
-import uuid
-import datetime
 
 # Third Party
 from fastapi import APIRouter
-from fastapi import HTTPException
-from typing import List
 
 # Places Code
 from places.service.recipes.manager import get_manager as get_recipes_manager
@@ -15,7 +11,6 @@ from places.service.recipes.models import (
     Instruction,
     Ingredient,
     Note,
-    RecipesModel,
 )
 
 # Constants
@@ -33,7 +28,7 @@ def add_recipe(recipe: RecipeModel) -> RecipeModel:
         recipe (RecipeModel): Recipe to add to the database
     """
     logger.info(f"Adding recipe {recipe.name}")
-    return recipes_manager.add(recipe=recipe)
+    return recipes_manager.add_recipe(recipe=recipe)
 
 
 @router.post("/instruction/add")

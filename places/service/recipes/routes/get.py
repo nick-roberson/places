@@ -1,12 +1,8 @@
 # Standard
 import logging
-import uuid
-import datetime
 
 # Third Party
 from fastapi import APIRouter
-from fastapi import HTTPException
-from typing import List
 
 # Places Code
 from places.service.recipes.manager import get_manager as get_recipes_manager
@@ -31,3 +27,25 @@ def get_all() -> RecipesModel:
     """
     logger.info(f"Getting all recipes")
     return recipes_manager.get_all()
+
+
+@router.get("/recipes/{recipe_id}")
+def get(recipe_id: str) -> RecipeModel:
+    """Get a recipe from the database.
+
+    Args:
+        recipe_id (str): Recipe id to get from the database
+    """
+    logger.info(f"Getting recipe {recipe_id}")
+    return recipes_manager.get(recipe_id=recipe_id)
+
+
+@router.get("/recipes/name/{name}")
+def get_by_name(name: str) -> RecipesModel:
+    """Get a recipe from the database.
+
+    Args:
+        recipe_id (str): Recipe id to get from the database
+    """
+    logger.info(f"Getting recipe {name}")
+    return recipes_manager.get_by_name(name=name)
