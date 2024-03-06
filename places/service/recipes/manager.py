@@ -27,18 +27,39 @@ class RecipeManager:
         self.collection = get_collection(self.client, self.collection_name)
 
     ########################################################
-    # Drop                                                 #
+    # Delete                                               #
     ########################################################
 
-    def drop_all(self) -> None:
+    def delete_all(self) -> None:
         """Drop all comments"""
         print(f"Dropping all from {self.collection_name}")
         self.collection.drop()
 
-    def drop_by_id(self, recipe_id: str) -> None:
+    def delete_recipe_by_id(self, recipe_id: str) -> None:
         """Drop a comment by id"""
         self.collection.delete_many({"id": recipe_id})
         print(f"Dropped {recipe_id} from {self.collection_name}")
+
+    def delete_instruction_by_id(self, recipe_id: str, instruction_id: str) -> None:
+        """Drop a comment by id"""
+        self.collection.update_one(
+            {"id": recipe_id}, {"$pull": {"instructions": {"id": instruction_id}}}
+        )
+        print(f"Dropped {instruction_id} from {recipe_id} in {self.collection_name}")
+
+    def delete_ingredient_by_id(self, recipe_id: str, ingredient_id: str) -> None:
+        """Drop a comment by id"""
+        self.collection.update_one(
+            {"id": recipe_id}, {"$pull": {"ingredients": {"id": ingredient_id}}}
+        )
+        print(f"Dropped {ingredient_id} from {recipe_id} in {self.collection_name}")
+
+    def delete_note_by_id(self, recipe_id: str, note_id: str) -> None:
+        """Drop a comment by id"""
+        self.collection.update_one(
+            {"id": recipe_id}, {"$pull": {"notes": {"id": note_id}}}
+        )
+        print(f"Dropped {note_id} from {recipe_id} in {self.collection_name}")
 
     ########################################################
     # Get                                                  #

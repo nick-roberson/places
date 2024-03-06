@@ -21,9 +21,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from places.service.places.manager import PlacesManager
 
 # Places Routes
-from places.service.places.routes.add import router as add_routes
-from places.service.places.routes.remove import router as delete_routes
-from places.service.places.routes.get import router as get_routes
+from places.service.places.routes.add import router as add_places_routes
+from places.service.places.routes.remove import router as delete_places_routes
+from places.service.places.routes.get import router as get_places_routes
 
 # Comments Routes
 from places.service.comments.routes.comments import router as comments_routes
@@ -31,14 +31,16 @@ from places.service.comments.routes.comments import router as comments_routes
 # Recipe Routes
 from places.service.recipes.routes.add import router as add_recipes_routes
 from places.service.recipes.routes.get import router as get_recipes_routes
+from places.service.recipes.routes.delete import router as delete_recipes_routes
 
 # Initialize FastAPI App
 app = FastAPI()
 
 # Add Places Endpoints
-app.include_router(add_routes)
-app.include_router(delete_routes)
-app.include_router(get_routes)
+app.include_router(add_places_routes)
+app.include_router(get_places_routes)
+app.include_router(delete_places_routes)
+
 
 # Add Comments Endpoints
 app.include_router(comments_routes)
@@ -46,6 +48,7 @@ app.include_router(comments_routes)
 # Add Recipe Endpoints
 app.include_router(add_recipes_routes)
 app.include_router(get_recipes_routes)
+app.include_router(delete_recipes_routes)
 
 # Allow CORS
 app.add_middleware(

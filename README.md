@@ -9,25 +9,32 @@ Would be nice to add some integration that would allow me to more easily book re
 
 ## Features
 
-**Current:**
-- Browse and search all saved places that you have been to
-- Link out to the Google page to more easily make reservations
-- Add new places to the list based on name and location (using Google Places API). Duplicates will not be added
-- Export the current selection in the table (abides by the current search and sort)
+### Restaurants & Places to Go
+
+- Add / Remove places from your list
+- Add / Remove comments to places that you have been
+- Browse all places you have been
+- Search all palces you have been
+- Drilldown / Filter in table view
+- Link out to exact Google results for each place
+- Export current selection to a list of places
 
 **TODO:**
 - Add a map view to see all the places you have been to
 - Add a way to add a review to a place
 - Add a way to add a photo to a place
 - Add a way to add a reservation to a place
-- (DONE) Add a remove button
 - Bulk import using CSV 
-
-**TODO v2:**
 - Add a way to add a place to a list (e.g. "Places to go in NYC")
-- (DONE) Add a way to add notes to a place 
 - Recipe page for users that want to create a recipe book
 - Add a way to add a recipe to a place
+
+### Recipes
+
+- Add / Remove recipes from your list
+- Add `Ingredients` to your recipe
+- Add `Instructions` to your recipe
+- Add `Notes` to your recipe
 
 # Setup
 
