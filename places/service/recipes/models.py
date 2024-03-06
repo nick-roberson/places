@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Optional
 from pydantic import validator
+import uuid
 
 
 class Ingredient(BaseModel):
@@ -12,6 +13,12 @@ class Ingredient(BaseModel):
     quantity: str
     measurement: str
     preparation: Optional[str] = None
+
+    @validator("id")
+    def ensure_unique_id(cls, v):
+        if v == "" or v is None:
+            return str(uuid.uuid4())
+        return v
 
     @validator("name")
     def name_must_not_be_blank(cls, v):
@@ -46,6 +53,12 @@ class Instruction(BaseModel):
     step: int
     description: str
 
+    @validator("id")
+    def ensure_unique_id(cls, v):
+        if v == "" or v is None:
+            return str(uuid.uuid4())
+        return v
+
     @validator("step")
     def step_must_be_positive(cls, v):
         if v <= 0:
@@ -66,6 +79,12 @@ class Note(BaseModel):
 
     title: str
     body: str
+
+    @validator("id")
+    def ensure_unique_id(cls, v):
+        if v == "" or v is None:
+            return str(uuid.uuid4())
+        return v
 
     @validator("title")
     def title_must_not_be_blank(cls, v):
@@ -92,6 +111,12 @@ class RecipeModel(BaseModel):
     ingredients: List[Ingredient] = []
     instructions: List[Instruction] = []
     notes: List[Note] = []
+
+    @validator("id")
+    def ensure_unique_id(cls, v):
+        if v == "" or v is None:
+            return str(uuid.uuid4())
+        return v
 
     @validator("name")
     def name_must_not_be_blank(cls, v):

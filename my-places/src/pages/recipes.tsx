@@ -16,6 +16,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
+import { DataGrid, GridToolbar, GridColDef, GridEventListener} from '@mui/x-data-grid';
 
 // My imports
 import { Configuration } from '../api';
@@ -24,8 +25,28 @@ import { RecipeModel } from '../api';
 import { Ingredient } from '../api';
 import { Instruction } from '../api';
 import { Note } from '../api';
+import { Data } from '@react-google-maps/api';
 
-// function to take in apiClient and return all reicpes 
+
+// DataGrid columns for ingredients, instructions, and notes
+const ingredientCols: GridColDef[] = [
+    { field: 'name', headerName: 'Name', width: 120 },
+    { field: 'quantity', headerName: 'Quantity', width: 120 },
+    { field: 'measurement', headerName: 'Measurement', width: 120 },
+    { field: 'preparation', headerName: 'Preparation', width: 1000 },
+];
+
+const instructionCols: GridColDef[] = [
+    { field: 'step', headerName: 'Step', width: 50 },
+    { field: 'description', headerName: 'Description', width: 1000 },
+];
+
+const noteCols: GridColDef[] = [
+    { field: 'title', headerName: 'Title', width: 200 },
+    { field: 'body', headerName: 'Body', width: 1000 },
+];
+
+// Function to take in apiClient and return all reicpes 
 const getRecipes = async (apiClient: DefaultApi) => {
     const recipes = await apiClient.getAllRecipesAllGet();
     return recipes.recipes;
@@ -121,20 +142,42 @@ const addIngredient = async (apiClient: DefaultApi, recipe: RecipeModel) => {
 
 
 const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
+
+    // Ingredient DataGrid
+    const ingredientRows = recipe.ingredients?.map((ingredient: Ingredient) => {
+        return {
+            id: ingredient.id,
+            name: ingredient.name,
+            quantity: ingredient.quantity,
+            measurement: ingredient.measurement,
+            preparation: ingredient.preparation,
+        };
+    });
+
+    // Instructions DataGrid
+    const instructionRows = recipe.instructions?.map((instruction: Instruction) => {
+        return {
+            id: instruction.id,
+            step: instruction.step,
+            description: instruction.description,
+        };
+    });
+
+    // Notes DataGrid
+    const noteRows = recipe.notes?.map((note: Note) => {
+        return {
+            id: note.id,
+            title: note.title,
+            body: note.body,
+        };
+    });
+
     return (
         <div>
 
-            <Typography variant="h6" gutterBottom>
-                Name: {recipe.name}
-            </Typography>
-
-            <p>
-                {recipe.description} 
-            </p>
-
-            <p>
-                Source: {recipe.source?.toString()}
-            </p>
+            <Typography variant="h6" gutterBottom>Name: {recipe.name}</Typography>
+            <p> <strong>Description: </strong> {recipe.description} </p>
+            <p> <strong>Source: </strong> {recipe.source?.toString()} </p>
 
             {/* Display the ingredients  as a list */}
             {
@@ -143,20 +186,39 @@ const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
                         <AccordionSummary>
                             Ingredients
                         </AccordionSummary>
+
                         <AccordionDetails>
-                            <List>
-                                {recipe.ingredients.map((ingredient: Ingredient) => (
-                                    <ListItem>
-                                        <ListItemText 
-                                            primary={ingredient.name + " " + ingredient.quantity + " " + ingredient.measurement}
-                                            secondary={ingredient.preparation?.toString()}
-                                        />
-                                    </ListItem>
-                                ))}
-                            </List>
+                            <DataGrid
+                                rows={ingredientRows}
+                                columns={ingredientCols}
+                                initialState={
+                                    {
+                                        pagination: {
+                                            paginationModel: { page: 0, pageSize: 10 },
+                                        },
+                                    }
+                                }
+                                pageSizeOptions={[10, 20]}
+                                slots={{ toolbar: GridToolbar }}
+                            />
+                            <Button 
+                                variant="contained"
+                                color="primary"
+                                onClick={() => 
+                                    ingredientRows.push({
+                                        id: ingredientRows.length,
+                                        name: "New Ingredient",
+                                        quantity: "1",
+                                        measurement: "cup",
+                                        preparation: "none",
+                                    })
+                                }>Add Ingredient
+                            </Button>  
+
+                            
                         </AccordionDetails>
 
-                        <Grid container spacing={2}>
+                        <Grid container spacing={2}  m={.5}>
                             <Grid xs={2} m={.5}>
                                 <Input id="new-ingredient-name" placeholder="Name"/>
                             </Grid>
@@ -191,19 +253,22 @@ const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
                             Instructions
                         </AccordionSummary>
                         <AccordionDetails>
-                            <List>
-                                {recipe.instructions.map((instruction: Instruction) => (
-                                    <ListItem>
-                                        <ListItemText 
-                                            primary={instruction.step}
-                                            secondary={instruction.description?.toString()}
-                                        />
-                                    </ListItem>
-                                ))}
-                            </List>
+                            <DataGrid
+                                rows={instructionRows}
+                                columns={instructionCols}
+                                initialState={
+                                    {
+                                        pagination: {
+                                            paginationModel: { page: 0, pageSize: 10 },
+                                        },
+                                    }
+                                }
+                                pageSizeOptions={[10, 20]}
+                                slots={{ toolbar: GridToolbar }}
+                            />
                         </AccordionDetails>
 
-                        <Grid container spacing={2}>
+                        <Grid container spacing={2}  m={.5}>
                             <Grid xs={3} m={.5}>
                                 <Input id="new-instruction-step" placeholder="Step"/>
                             </Grid>
@@ -233,19 +298,22 @@ const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
                                 Notes
                             </AccordionSummary>
                             <AccordionDetails>
-                                <List>
-                                    {recipe.notes.map((note: Note) => (
-                                        <ListItem>
-                                            <ListItemText 
-                                                primary={note.title}
-                                                secondary={note.body}
-                                            />
-                                        </ListItem>
-                                    ))}
-                                </List>
+                                <DataGrid
+                                    rows={noteRows}
+                                    columns={noteCols}
+                                    initialState={
+                                        {
+                                            pagination: {
+                                                paginationModel: { page: 0, pageSize: 10 },
+                                            },
+                                        }
+                                    }
+                                    pageSizeOptions={[10, 20]}
+                                    slots={{ toolbar: GridToolbar }}
+                                />
                             </AccordionDetails>
 
-                            <Grid container spacing={2}>
+                            <Grid container spacing={2} m={.5}>
                                 <Grid xs={3} m={.5}>
                                     <Input id="new-note-title" placeholder="Title"/>
                                 </Grid>

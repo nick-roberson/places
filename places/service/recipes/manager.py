@@ -62,6 +62,15 @@ class RecipeManager:
         recipe = self.collection.find_one({"id": recipe_id})
         return RecipeModel(**recipe)
 
+    def get_by_name(self, name: str) -> RecipesModel:
+        """Get all recipes by name
+        Args:
+            name (str): Recipe name
+        """
+        print(f"Getting recipes for {name}")
+        recipes = self.collection.find({"name": name})
+        return RecipesModel(recipes=[RecipeModel(**recipe) for recipe in recipes])
+
     ########################################################
     # Add                                                  #
     ########################################################
@@ -72,8 +81,39 @@ class RecipeManager:
             recipe (RecipeModel): Recipe model
         """
         print(f"Inserting {recipe.name} into {self.collection_name}")
+
+        # If the recipe has name, lets check if it already exists
+        if recipe.name:
+            existing = self.get_by_name(recipe.name)
+            if existing.recipes:
+                print(f"Recipe {recipe.name} already exists")
+                return None
+
+        # If the recipe has an id, lets check if it already exists
+        if recipe.id:
+            existing = self.get(recipe.id)
+            if existing:
+                print(f"Recipe {recipe.id} already exists")
+                return None
+
         try:
+            # Update the recipe with a new id
             recipe.id = str(uuid.uuid4())
+
+            # check that all notes have an id
+            for note in recipe.notes:
+                if note.id is None:
+                    note.id = str(uuid.uuid4())
+            # check that all ingredients have an id
+            for ingredient in recipe.ingredients:
+                if ingredient.id is None:
+                    ingredient.id = str(uuid.uuid4())
+            # check that all instructions have an id
+            for instruction in recipe.instructions:
+                if instruction.id is None:
+                    instruction.id = str(uuid.uuid4())
+
+            # Insert the recipe into the collection
             self.collection.insert_one(recipe.dict())
             return recipe
         except Exception as e:
@@ -89,6 +129,9 @@ class RecipeManager:
         """
         print(f"Adding instruction to {recipe_id}")
         try:
+            # update the recipe with a new id
+            instruction.id = str(uuid.uuid4())
+            # add the instruction to the recipe
             self.collection.update_one(
                 {"id": recipe_id}, {"$push": {"instructions": instruction.dict()}}
             )
@@ -106,6 +149,9 @@ class RecipeManager:
         """
         print(f"Adding ingredient to {recipe_id}")
         try:
+            # update the recipe with a new id
+            ingredient.id = str(uuid.uuid4())
+            # add the ingredient to the recipe
             self.collection.update_one(
                 {"id": recipe_id}, {"$push": {"ingredients": ingredient.dict()}}
             )
@@ -123,6 +169,9 @@ class RecipeManager:
         """
         print(f"Adding note to {recipe_id}")
         try:
+            # update the recipe with a new id
+            note.id = str(uuid.uuid4())
+            # add the note to the recipe
             self.collection.update_one(
                 {"id": recipe_id}, {"$push": {"notes": note.dict()}}
             )
