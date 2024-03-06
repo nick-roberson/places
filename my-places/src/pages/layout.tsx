@@ -12,7 +12,7 @@ function Layout() {
     // Define the pages and their routes
     const [pages] = React.useState<string[]>(['Home', 'Places', 'Recipes']);
     const [pages_map] = React.useState<Record<string, string>>({
-      'Home': '/',
+      'Home': '/home',
       'Places': '/places',
       'Recipes': '/recipes',
     });

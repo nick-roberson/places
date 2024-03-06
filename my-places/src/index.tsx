@@ -24,6 +24,7 @@ export default function HomePage() {
       <Routes>
         <Route path="/" element={<Layout />}>
           {/* <Route index element={<Home />} /> */}
+          <Route path="/home" element={<Home />} />
           <Route path="/places" element={<MyPlaces />} />
           <Route path="/recipes" element={<MyRecipes />} />
           <Route path="*" element={<NoPage />} />
