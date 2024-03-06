@@ -32,6 +32,7 @@ from places.service.comments.routes.comments import router as comments_routes
 from places.service.recipes.routes.add import router as add_recipes_routes
 from places.service.recipes.routes.get import router as get_recipes_routes
 from places.service.recipes.routes.delete import router as delete_recipes_routes
+from places.service.recipes.routes.update import router as update_recipes_routes
 
 # Initialize FastAPI App
 app = FastAPI()
@@ -49,6 +50,7 @@ app.include_router(comments_routes)
 app.include_router(add_recipes_routes)
 app.include_router(get_recipes_routes)
 app.include_router(delete_recipes_routes)
+app.include_router(update_recipes_routes)
 
 # Allow CORS
 app.add_middleware(

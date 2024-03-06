@@ -202,3 +202,86 @@ class RecipeManager:
         except Exception as e:
             print(f"Error adding note to {recipe_id}: {e}")
             return None
+
+    ########################################################
+    # Update                                               #
+    ########################################################
+
+    def update_recipe(self, recipe: RecipeModel) -> RecipeModel:
+        """Update a recipe in the database.
+        Args:
+            recipe (RecipeModel): Recipe to update in the database
+        """
+        print(f"Updating recipe {recipe.name}")
+        try:
+            # check that all notes have an id
+            for note in recipe.notes:
+                if note.id is None:
+                    note.id = str(uuid.uuid4())
+            # check that all ingredients have an id
+            for ingredient in recipe.ingredients:
+                if ingredient.id is None:
+                    ingredient.id = str(uuid.uuid4())
+            # check that all instructions have an id
+            for instruction in recipe.instructions:
+                if instruction.id is None:
+                    instruction.id = str(uuid.uuid4())
+            # update the recipe in the collection
+            self.collection.update_one({"id": recipe.id}, {"$set": recipe.dict()})
+            return recipe
+        except Exception as e:
+            print(f"Error updating recipe {recipe.name}: {e}")
+            return None
+
+    def update_instruction(
+        self, recipe_id: str, instruction: Instruction
+    ) -> Instruction:
+        """Update an instruction in the database.
+        Args:
+            instruction (Instruction): Instruction to update in the database
+        """
+        print(f"Updating instruction {instruction}")
+        try:
+            # update the instruction in the recipe
+            self.collection.update_one(
+                {"id": recipe_id, "instructions.id": instruction.id},
+                {"$set": {"instructions.$": instruction.dict()}},
+            )
+            return instruction
+        except Exception as e:
+            print(f"Error updating instruction {instruction}: {e}")
+            return None
+
+    def update_ingredient(self, recipe_id: str, ingredient: Ingredient) -> Ingredient:
+        """Update an ingredient in the database.
+        Args:
+            ingredient (Ingredient): Ingredient to update in the database
+        """
+        print(f"Updating ingredient {ingredient}")
+        try:
+            # update the ingredient in the recipe
+            self.collection.update_one(
+                {"id": recipe_id, "ingredients.id": ingredient.id},
+                {"$set": {"ingredients.$": ingredient.dict()}},
+            )
+            return ingredient
+        except Exception as e:
+            print(f"Error updating ingredient {ingredient}: {e}")
+            return None
+
+    def update_note(self, recipe_id: str, note: Note) -> Note:
+        """Update a note in the database.
+        Args:
+            note (Note): Note to update in the database
+        """
+        print(f"Updating note {note}")
+        try:
+            # update the note in the recipe
+            self.collection.update_one(
+                {"id": recipe_id, "notes.id": note.id},
+                {"$set": {"notes.$": note.dict()}},
+            )
+            return note
+        except Exception as e:
+            print(f"Error updating note {note}: {e}")
+            return None

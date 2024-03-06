@@ -21,18 +21,18 @@ logger = logging.getLogger(__name__)
 
 
 @router.delete("/recipes/delete")
-def delete_recipe(recipe: RecipeModel) -> RecipeModel:
+def delete_recipe(recipe_id: str):
     """Delete a recipe from the database.
 
     Args:
         recipe_id (str): Recipe id to delete
     """
-    logger.info(f"Deleting recipe {recipe.name}")
-    return recipes_manager.delete_recipe_by_id(recipe_id=recipe.id)
+    logger.info(f"Deleting recipe {recipe_id}")
+    return recipes_manager.delete_recipe_by_id(recipe_id=recipe_id)
 
 
 @router.delete("/instruction/delete")
-def delete_instruction(recipe_id: str, instruction_id: str) -> Instruction:
+def delete_instruction(recipe_id: str, instruction_id: str):
     """Delete an instruction from the database.
 
     Args:
@@ -46,7 +46,7 @@ def delete_instruction(recipe_id: str, instruction_id: str) -> Instruction:
 
 
 @router.delete("/ingredient/delete")
-def delete_ingredient(recipe_id: str, ingredient_id: str) -> Ingredient:
+def delete_ingredient(recipe_id: str, ingredient_id: str):
     """Delete an ingredient from the database.
 
     Args:
@@ -60,7 +60,7 @@ def delete_ingredient(recipe_id: str, ingredient_id: str) -> Ingredient:
 
 
 @router.delete("/note/delete")
-def delete_note(recipe_id: str, note_id: str) -> Note:
+def delete_note(recipe_id: str, note_id: str):
     """Delete a note from the database.
 
     Args:

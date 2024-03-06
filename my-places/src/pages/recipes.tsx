@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 
 // Third Party
-import Icon from '@mui/material/Icon';
 import Input from '@mui/joy/Input';
 import Grid from '@mui/system/Unstable_Grid';
 import Alert from '@mui/material/Alert';
@@ -18,6 +17,13 @@ import ListItemText from '@mui/material/ListItemText';
 import { DataGrid, GridToolbar, GridColDef} from '@mui/x-data-grid';
 import { createSvgIcon } from '@mui/material/utils';
 import Stack from '@mui/material/Stack';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 // My imports
 import { Configuration } from '../api';
@@ -155,6 +161,15 @@ const addIngredient = async (apiClient: DefaultApi, recipe: RecipeModel) => {
     return response;
 }
 
+const deleteRecipe = async (apiClient: DefaultApi, recipe: RecipeModel) => {
+    // if the recipe does not have an id, throw an error
+    if (!recipe.id) {
+        throw new Error("Recipe does not have an id");
+    }
+    // delete the recipe
+    const response = await apiClient.deleteRecipeRecipesDeleteDelete({ recipeId: recipe.id });
+    return response;
+}
 
 const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
 
@@ -194,12 +209,13 @@ const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
             <p> <strong>Description: </strong> {recipe.description} </p>
             <p> <strong>Source: </strong> {recipe.source?.toString()} </p>
 
+            <Divider> <h3> Ingredients </h3> </Divider>
+
             {/* Display the ingredients  as a list */}
             {
                 recipe.ingredients ? (
-                    <Box>
+                    <Grid>
 
-                        <h3>Ingredients</h3>
                         <Grid container spacing={2}  m={.5}>
                             <Grid xs={2} m={.25}><Input id="new-ingredient-name" placeholder="Name"/></Grid>
                             <Grid xs={2} m={.25}><Input id="new-ingredient-quantity" placeholder="Quantity" /></Grid>
@@ -209,7 +225,9 @@ const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
                                 <Button 
                                     variant="contained"
                                     color="primary"
-                                    onClick={() => addIngredient(apiClient, recipe)}>Add Ingredient
+                                    sx={{ marginLeft: "auto" }}
+                                    onClick={() => addIngredient(apiClient, recipe)}>
+                                        Add Ingredient
                                 </Button>
                             </Grid>
                         </Grid>
@@ -217,6 +235,7 @@ const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
                         <DataGrid
                             rows={ingredientRows}
                             columns={ingredientCols}
+                            density="compact"
                             initialState={
                                 {
                                     pagination: {
@@ -227,23 +246,36 @@ const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
                             pageSizeOptions={[10, 20]}
                             slots={{ toolbar: GridToolbar }}
                         />
-                    </Box>
+                    </Grid>
                 ) : "No ingredients yet."
             }
 
-            <Divider />
+            <Divider> <h3> Instructions </h3> </Divider>
 
             {/* Display the instructions as a list */}
             {
                 recipe.instructions ? (
+                <Grid>
+                    <Grid container spacing={1} m={.5}>
+                        <Grid xs={3} m={.5}><Input id="new-instruction-step" placeholder="Step"/></Grid>
+                        <Grid xs={6} m={.5}><Input id="new-instruction-description" placeholder="Description" /></Grid>
+                        <Grid xs={2} m={.5}>
+                            <Button 
+                                variant="contained"
+                                color="primary"
+                                sx={{ marginLeft: "auto" }}
+                                onClick={() => addInstruction(apiClient, recipe)}>
+                                    Add Instruction
+                            </Button>
+                        </Grid>
+                    </Grid>
+                
                     <Accordion>
-                        <AccordionSummary>
-                            Instructions
-                        </AccordionSummary>
                         <AccordionDetails>
                             <DataGrid
                                 rows={instructionRows}
                                 columns={instructionCols}
+                                density="compact"
                                 initialState={
                                     {
                                         pagination: {
@@ -255,36 +287,37 @@ const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
                                 slots={{ toolbar: GridToolbar }}
                             />
                         </AccordionDetails>
-
-                        <Grid container spacing={2}  m={.5}>
-                            <Grid xs={3} m={.5}><Input id="new-instruction-step" placeholder="Step"/></Grid>
-                            <Grid xs={6} m={.5}><Input id="new-instruction-description" placeholder="Description" /></Grid>
-                            <Grid xs={2} m={.5}>
-                                <Button 
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => addInstruction(apiClient, recipe)}>Add Instruction
-                                </Button>
-                            </Grid>
-                        </Grid>
-
                     </Accordion>
+                </Grid>
                 ) : "No instructions yet."
             }
 
-            <Divider/>
+            <Divider> <h3> Notes </h3> </Divider>
 
             {/* Display the notes as a list */}
             {
                 recipe.notes ? (
+                <Grid>
+                    <Grid container spacing={1} m={.5}>
+                        <Grid xs={3} m={.5}><Input id="new-note-title" placeholder="Title"/></Grid>
+                        <Grid xs={6} m={.5}><Input id="new-note-body" placeholder="Body" /></Grid>
+                        <Grid xs={2} m={.5}>
+                            <Button 
+                                variant="contained"
+                                color="primary"
+                                sx={{ marginLeft: "auto" }}
+                                onClick={() => addNote(apiClient, recipe)}>
+                                    Add Note
+                            </Button>
+                        </Grid>
+                    </Grid>
+
                     <Accordion>
-                        <AccordionSummary>
-                            Notes
-                        </AccordionSummary>
                         <AccordionDetails>
                             <DataGrid
                                 rows={noteRows}
                                 columns={noteCols}
+                                density="compact"
                                 initialState={
                                     {
                                         pagination: {
@@ -296,19 +329,8 @@ const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
                                 slots={{ toolbar: GridToolbar }}
                             />
                         </AccordionDetails>
-
-                        <Grid container spacing={2} m={.5}>
-                            <Grid xs={3} m={.5}><Input id="new-note-title" placeholder="Title"/></Grid>
-                            <Grid xs={6} m={.5}><Input id="new-note-body" placeholder="Body" /></Grid>
-                            <Grid xs={2} m={.5}>
-                                <Button 
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={() => addNote(apiClient, recipe)}>Add Note
-                                </Button>
-                            </Grid>
-                        </Grid>
                     </Accordion>
+                </Grid>
                 ) : "No notes yet"
             }
 
@@ -345,20 +367,6 @@ export function MyRecipes() {
 
     }, []);
 
-    // Function to add a new recipe
-    const addRecipe = async (apiClient: DefaultApi | null) => {
-        if (!apiClient) {
-            throw new Error("No API client");
-        }
-        const newRecipe = {
-            name: "New Recipe",
-            description: "New Description",
-            source: "New Source",
-        };
-        const response = await apiClient.addRecipeRecipesAddPost({ recipeModel: newRecipe });
-        return response;
-    }
-
     // Function to refresh the recipes
     const refreshRecipes = async (apiClient: DefaultApi | null) => {
         if (!apiClient) {
@@ -367,6 +375,35 @@ export function MyRecipes() {
         const recipes = await getRecipes(apiClient);
         setAllRecipes(recipes);
     }
+
+    // Dialog state
+    const theme = useTheme();
+    const [open, setOpen] = React.useState(false);
+    const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+
+    const handleDialogCreate = async () => {
+        // Create the new recipe
+        if (!apiClient) {
+            throw new Error("No API client");
+        }
+        const response = await apiClient.addRecipeRecipesAddPost({ recipeModel: {
+            name: newRecipeName,
+            description: newRecipeDescription,
+            source: newRecipeSource,
+        } });
+        // Close 
+        handleDialogClose();
+    }
+    
+    // Simply close the dialog
+    const handleDialogClose = () => {
+      setOpen(false);
+    };
+
+    // Dialog for adding a new recipe
+    const [newRecipeName, setNewRecipeName] = React.useState("");
+    const [newRecipeDescription, setNewRecipeDescription] = React.useState("");
+    const [newRecipeSource, setNewRecipeSource] = React.useState("");
 
     return (
         <div>
@@ -380,22 +417,64 @@ export function MyRecipes() {
                                 Recipes
                             </Typography>
 
+                            {/* Add new recipe button */}
                             <Typography variant="h4" gutterBottom>
                                 <Button
-                                    onClick={() => addRecipe(apiClient).then((any) => refreshRecipes(apiClient))}
+                                    onClick={() => setOpen(true)}
                                 >
                                     <PlusIcon color="primary"/>
                                 </Button>
                             </Typography>
 
+                            {/* Dialog for adding a new recipe */}
+                            <Dialog
+                                fullScreen={fullScreen}
+                                open={open}
+                                onClose={handleDialogClose}
+                                aria-labelledby="responsive-dialog-title"
+                            >
+                                <DialogTitle id="responsive-dialog-title">
+                                    {"Add new recipe!"}
+                                </DialogTitle>
+
+                                <DialogContent>
+                                    <Input id="new-recipe-name" placeholder="Name" onChange={(e) => setNewRecipeName(e.target.value)}/>
+                                    <Input id="new-recipe-description" placeholder="Description" onChange={(e) => setNewRecipeDescription(e.target.value)}/>
+                                    <Input id="new-recipe-source" placeholder="Source" onChange={(e) => setNewRecipeSource(e.target.value)}/>
+                                </DialogContent>
+
+                                <DialogActions>
+                                    <Button autoFocus onClick={handleDialogClose}>
+                                        Close
+                                    </Button>
+                                    <Button onClick={handleDialogCreate} autoFocus>
+                                        Create
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
+
                         </Stack>
                         <List>
-                            {allRecipes?.map((recipe) => (
+                            {apiClient && allRecipes?.map((recipe) => (
                                 <ListItem>
+
+                                    {/* Recipe name */}
                                     <ListItemText 
                                         primary={recipe.name}
-                                        onClick={() => setSelectedRecipe(recipe)}
+                                        onClick={() => {
+                                            setSelectedRecipe(recipe)
+                                        }}
                                     />
+                                    
+                                    {/* Delete button */}
+                                    <IconButton
+                                        onClick={() => {
+                                            deleteRecipe(apiClient, recipe)
+                                            refreshRecipes(apiClient)
+                                        }}>
+                                        <DeleteIcon />
+                                    </IconButton>
+
                                 </ListItem>
                             ))}
                         </List>
