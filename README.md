@@ -3,11 +3,19 @@
 Personal project to manage my favorite places to go and eat / visit. Requires a free MongoDB Atlas account to run
 as well as a Google Maps/Places API key. This should be easy to set up. 
 
-![data/landing_page.png](data/landing_page.png)
+## Home Page
+![data/home_page.png](data/home_page.png)
+
+## Places Page
+![data/places_page.png](data/places_page.png)
+
+## Recipes Page
+![data/recipes_page.png](data/recipes_page.png)
+
 
 Would be nice to add some integration that would allow me to more easily book reservations using this but the Resy API is really expensive.
 
-## Features
+# Features
 
 ### Restaurants & Places to Go
 
