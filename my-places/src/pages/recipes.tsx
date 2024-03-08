@@ -180,6 +180,9 @@ const deleteRecipe = async (apiClient: DefaultApi, recipe: RecipeModel) => {
 const createIngredientRowsFromRecipe = (recipe: RecipeModel) => {
     return recipe.ingredients?.map((ingredient: Ingredient) => {
         return {
+            // recipe info
+            recipeId: recipe.id,
+            // ingredient info
             id: ingredient.id,
             name: ingredient.name,
             quantity: ingredient.quantity,
@@ -192,6 +195,9 @@ const createIngredientRowsFromRecipe = (recipe: RecipeModel) => {
 const createInstructionRowsFromRecipe = (recipe: RecipeModel) => {
     return recipe.instructions?.map((instruction: Instruction) => {
         return {
+            // recipe info
+            recipeId: recipe.id,
+            // instruction info
             id: instruction.id,
             step: instruction.step,
             description: instruction.description,
@@ -202,6 +208,9 @@ const createInstructionRowsFromRecipe = (recipe: RecipeModel) => {
 const createNoteRowsFromRecipe = (recipe: RecipeModel) => {
     return recipe.notes?.map((note: Note) => {
         return {
+            // recipe info
+            recipeId: recipe.id,
+            // note info
             id: note.id,
             title: note.title,
             body: note.body,
@@ -240,7 +249,6 @@ const MutateNoteRowCallback = () => {
       (recipeManager: RecipeManager, note: Note) =>
         new Promise<Note>((resolve, reject) => {
           setTimeout(() => {
-            console.log('Updating note', note)
             recipeManager.updateNote(note);
             resolve({ ...note });
           }, 200);
@@ -252,7 +260,7 @@ const MutateNoteRowCallback = () => {
 export function MyRecipes() {
 
     // constants
-    const [apiClient, setApiClient] = React.useState<DefaultApi>(getAPIClient());
+    const [apiClient] = React.useState<DefaultApi>(getAPIClient());
 
     // variables for all recipes
     let [allRecipes, setAllRecipes] = React.useState<RecipeModel[] | null>(null);
@@ -430,7 +438,7 @@ export function MyRecipes() {
                 </p>
 
                 <Divider textAlign='left'><h3>Ingredients + Notes </h3></Divider>
-                <Grid container spacing={2} xs={12}>
+                <Grid container spacing={1} xs={12}>
                     <Grid xs={6}>
                         <Button color="primary" onClick={addIngredientRow}><strong>Add Ingredient</strong></Button>
                         {
@@ -516,18 +524,18 @@ export function MyRecipes() {
     
     return (
         <div>
-            <Grid container spacing={2}>
+            <Grid container spacing={1}>
 
                 {/* Display the recipes in a toolbar on the left */}
                 <Grid xs={2} m={2}>
                     <Box>
                         <Stack direction="row" spacing={3}>
-                            <Typography variant="h4" gutterBottom>
-                                Recipes
+                            <Typography variant="h5" gutterBottom>
+                                All Recipes
                             </Typography>
 
                             {/* Add new recipe button */}
-                            <Typography variant="h4" gutterBottom>
+                            <Typography variant="h5" gutterBottom>
                                 <Button
                                     onClick={() => setOpen(true)}
                                 >
@@ -567,15 +575,15 @@ export function MyRecipes() {
                             {apiClient && allRecipes?.map((recipe) => (
                                 <ListItem>
 
-                                    {/* Recipe name */}
-                                    <ListItemText 
-                                        primary={recipe.name}
+                                    {/* Recipe name, bold if is selected recipe */}
+                                    <ListItemText
+                                        primary={
+                                            currentRecipeManager && currentRecipeManager.recipe.id === recipe.id ?
+                                            <strong>{recipe.name}</strong> :
+                                            recipe.name
+                                        }
                                         onClick={() => {
-                                            setCurrentRecipeManager(new RecipeManager(recipe));
-                                            currentRecipeManagerRef.current = new RecipeManager(recipe);
-                                            setInstructionRows(createInstructionRowsFromRecipe(recipe));
-                                            setIngredientRows(createIngredientRowsFromRecipe(recipe));
-                                            setNoteRows(createNoteRowsFromRecipe(recipe));
+                                            updateCurrentRecipe(recipe)
                                         }}
                                     />
                                     
