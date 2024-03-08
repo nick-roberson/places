@@ -129,10 +129,10 @@ const PlusIcon = createSvgIcon(
 
 // DataGrid columns for ingredients, instructions, and notes
 const ingredientCols: GridColDef[] = [
-    { field: 'name', headerName: 'Name', width: 200, editable: true },
-    { field: 'quantity', headerName: 'Quantity', width: 150, editable: true },
-    { field: 'measurement', headerName: 'Measurement', width: 150, editable: true },
-    { field: 'preparation', headerName: 'Preparation', width: 500, editable: true },
+    { field: 'name', headerName: 'Name', width: 150, editable: true },
+    { field: 'quantity', headerName: 'Qty', width: 75, editable: true },
+    { field: 'measurement', headerName: 'Unit', width: 75, editable: true },
+    { field: 'preparation', headerName: 'Prep', width: 200, editable: true },
     { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteIngredient},
 ];
 
@@ -143,8 +143,8 @@ const instructionCols: GridColDef[] = [
 ];
 
 const noteCols: GridColDef[] = [
-    { field: 'title', headerName: 'Title', width: 200, editable: true },
-    { field: 'body', headerName: 'Body', width: 800, editable: true },
+    { field: 'title', headerName: 'Title', width: 150, editable: true },
+    { field: 'body', headerName: 'Body', width: 350, editable: true },
     { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteNote},
 ];
 
@@ -468,80 +468,87 @@ export function MyRecipes() {
                 <p> <strong>Description: </strong> {recipe.description} </p>
                 <p> <strong>Source: </strong> {recipe.source?.toString()} </p>
 
-                <Divider textAlign='left'><h3>Ingredients </h3></Divider>
-                {
-                    recipe.ingredients ? (
-                        <Grid>
-                            <Button color="primary" onClick={addIngredientRow}><strong>Add Ingredient</strong></Button>
-                            <DataGrid
-                                rows={ingredientRows}
-                                columns={ingredientCols}
-                                processRowUpdate={processIngredientRowUpdate}  
-                                onProcessRowUpdateError={handleProcessRowUpdateError}                 
-                                density="compact"
-                                // initialState={
-                                //     {
-                                //         pagination: {
-                                //             paginationModel: { page: 0, pageSize: 10 },
-                                //         },
-                                //     }
-                                // }
-                                // pageSizeOptions={[10, 20]}
-                                // slots={{ toolbar: GridToolbar }}
-                            />
-                        </Grid>
-                    ) : "No ingredients yet."
-                }
+                <Divider textAlign='left'><h3>Ingredients + Notes </h3></Divider>
+                <Grid container spacing={2} xs={12}>
+                    <Grid xs={6}>
+                        <Button color="primary" onClick={addIngredientRow}><strong>Add Ingredient</strong></Button>
+                        {
+                            recipe.ingredients && recipe.ingredients?.length > 0 ? (
+                                <Grid>
+                                    <DataGrid
+                                        rows={ingredientRows}
+                                        columns={ingredientCols}
+                                        processRowUpdate={processIngredientRowUpdate}  
+                                        onProcessRowUpdateError={handleProcessRowUpdateError}       
+                                        density="compact"
+                                        initialState={
+                                            {
+                                                pagination: {
+                                                    paginationModel: { page: 0, pageSize: 10 },
+                                                },
+                                            }
+                                        }
+                                        pageSizeOptions={[10, 20]}
+                                        slots={{ toolbar: GridToolbar }}
+                                    />
+                                </Grid>
+                            ) : <div><br></br><p>No ingredients yet. Add one to get started.</p></div>
+                        }
+                    </Grid>
+
+                    <Grid xs={6}>
+                        <Button color="primary" onClick={addNoteRow}><strong>Add Note</strong></Button>
+                        {
+                            recipe.notes && recipe.notes?.length > 0 ? (
+                                <Grid>
+                                    <DataGrid
+                                        rows={noteRows}
+                                        columns={noteCols}
+                                        density="compact"
+                                        processRowUpdate={processNoteRowUpdate}
+                                        onProcessRowUpdateError={handleProcessRowUpdateError}
+                                        initialState={
+                                            {
+                                                pagination: {
+                                                    paginationModel: { page: 0, pageSize: 10 },
+                                                },
+                                            }
+                                        }
+                                        pageSizeOptions={[10, 20]}
+                                        slots={{ toolbar: GridToolbar }}
+                                    />
+                                </Grid>
+                                ) : <div><br></br><p>No notes yet. Add one to get started.</p></div>
+                        }
+                    </Grid>
+                </Grid>
     
                 <Divider textAlign='left'><h3>Instructions</h3></Divider>
+
+                <Button color="primary" onClick={addInstructionRow}><strong>Add Instruction</strong></Button>
                 {
-                    recipe.instructions ? (
+                    recipe.instructions && recipe.instructions?.length > 0 ? (
                         <Grid>
-                            <Button color="primary" onClick={addInstructionRow}><strong>Add Instruction</strong></Button>
                             <DataGrid
                                 rows={instructionRows}
                                 columns={instructionCols}
                                 density="compact"
                                 processRowUpdate={processInstructionRowUpdate}
                                 onProcessRowUpdateError={handleProcessRowUpdateError}
-                                // initialState={
-                                //     {
-                                //         pagination: {
-                                //             paginationModel: { page: 0, pageSize: 10 },
-                                //         },
-                                //     }
-                                // }
-                                // pageSizeOptions={[10, 20]}
-                                // slots={{ toolbar: GridToolbar }}
+                                initialState={
+                                    {
+                                        pagination: {
+                                            paginationModel: { page: 0, pageSize: 10 },
+                                        },
+                                    }
+                                }
+                                pageSizeOptions={[10, 20]}
+                                slots={{ toolbar: GridToolbar }}
                             />
                         </Grid>
-                        ) : "No instructions yet."
+                        ) : <div><br></br><p>No instructions yet. Add one to get started.</p></div>
                 }
     
-                <Divider textAlign='left'> <h3> Notes </h3> </Divider>
-                {
-                    recipe.notes ? (
-                        <Grid>
-                            <Button color="primary" onClick={addNoteRow}><strong>Add Note</strong></Button>
-                            <DataGrid
-                                rows={noteRows}
-                                columns={noteCols}
-                                density="compact"
-                                processRowUpdate={processNoteRowUpdate}
-                                onProcessRowUpdateError={handleProcessRowUpdateError}
-                                // initialState={
-                                //     {
-                                //         pagination: {
-                                //             paginationModel: { page: 0, pageSize: 10 },
-                                //         },
-                                //     }
-                                // }
-                                // pageSizeOptions={[10, 20]}
-                                // slots={{ toolbar: GridToolbar }}
-                            />
-                        </Grid>
-                        ) : "No notes yet"
-                }
             </div>
         );
     }
