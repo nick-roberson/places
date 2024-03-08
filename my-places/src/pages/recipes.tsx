@@ -26,16 +26,12 @@ import Tooltip from '@mui/material/Tooltip';
 // My imports
 import getAPIClient from './components/api_client';
 import { DefaultApi } from '../api/apis';
-import { RecipeModel } from '../api';
-import { Ingredient, IngredientFromJSON } from '../api';
-import { Instruction, InstructionFromJSON } from '../api';
-import { Note, NoteFromJSON } from '../api';
+import { RecipeModel, Ingredient, Instruction, Note, IngredientFromJSON, InstructionFromJSON, NoteFromJSON } from '../api';
 import { Divider, IconButton } from '@mui/material';
 
 // Recipe Manager 
 import RecipeManager from './components/recipe_manager';
-import { Link } from 'react-router-dom';
-import strict from 'assert/strict';
+import PrintRecipe from './components/print_recipe';
 
 const renderDeleteIngredient = (params: any) => {
     // Render the delete Icon in the table
@@ -127,7 +123,7 @@ const PlusIcon = createSvgIcon(
 const ingredientCols: GridColDef[] = [
     { field: 'name', headerName: 'Name', width: 150, editable: true },
     { field: 'quantity', headerName: 'Qty', width: 75, editable: true },
-    { field: 'measurement', headerName: 'Unit', width: 75, editable: true },
+    { field: 'measurement', headerName: 'Unit', width: 100, editable: true },
     { field: 'preparation', headerName: 'Prep', width: 200, editable: true, renderCell: (params: any) =>  (
         <Tooltip title={params.value} arrow>
             <p>{params.value}</p>
@@ -420,16 +416,30 @@ export function MyRecipes() {
         console.error(error);
     }, []);
     
+    const handleRecipePrint = (recipe: RecipeModel) => {
+        return () => {
+            PrintRecipe({recipe: recipe});
+        }
+    };
     
     const displayRecipe = (recipeManager: RecipeManager) => {
         return (
             <div>
-                <Alert severity="info">Recipe selected: {recipeManager.recipe.name}</Alert>
+                <Grid container spacing={1}>
+                    <Grid xs={10}>
+                        <Alert severity="info">Recipe selected: {recipeManager.recipe.name}</Alert>
+                    </Grid>
+                    <Grid xs={2}>
+                        <Button color="primary" variant="contained" onClick={handleRecipePrint(recipeManager.recipe)}><strong>Print / Save</strong></Button>
+                    </Grid>
+                </Grid>
                 <p> 
+                    {/* Display description*/}
                     <strong>Description: </strong> 
                     <p>{recipeManager.recipe.description} </p>
                 </p>
                 <p> 
+                    {/* Display source*/}
                     <strong>Source: </strong> {
                         recipeManager.recipe.source && recipeManager.recipe.source.toString().startsWith("http") ?
                         <p><a href={recipeManager.recipe.source.toString()} target="_blank" rel="noreferrer">{recipeManager.recipe.source.toString()}</a></p> :
@@ -517,7 +527,6 @@ export function MyRecipes() {
                         </Grid>
                         ) : <div><br></br><p>No instructions yet. Add one to get started.</p></div>
                 }
-    
             </div>
         );
     }
