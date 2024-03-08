@@ -24,14 +24,13 @@ import MenuIcon from '@mui/icons-material/Menu';
 import SearchIcon from '@mui/icons-material/Search';
 
 // Complex imports
-import { DataGrid, GridToolbar, GridColDef, GridEventListener} from '@mui/x-data-grid';
+import { DataGrid, GridToolbar, GridColDef, GridEventListener } from '@mui/x-data-grid';
 
 // My imports
 import { Configuration } from '../api';
 import { DefaultApi } from '../api/apis';
 import { Place, PlaceFromJSONTyped} from '../api/models/Place';
 import { CommentsModel } from '../api/models/CommentsModel';
-
 
 const renderSearchIcon = (params: any) => {
     // Render the search Icon in the table

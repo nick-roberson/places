@@ -21,6 +21,7 @@ import DialogActions from '@mui/material/DialogActions';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import DeleteIcon from '@mui/icons-material/Delete';
+import Tooltip from '@mui/material/Tooltip';
 
 // My imports
 import { Configuration } from '../api';
@@ -132,19 +133,34 @@ const ingredientCols: GridColDef[] = [
     { field: 'name', headerName: 'Name', width: 150, editable: true },
     { field: 'quantity', headerName: 'Qty', width: 75, editable: true },
     { field: 'measurement', headerName: 'Unit', width: 75, editable: true },
-    { field: 'preparation', headerName: 'Prep', width: 200, editable: true },
+    { field: 'preparation', headerName: 'Prep', width: 200, editable: true, renderCell: (params: any) =>  (
+        <Tooltip title={params.value} arrow>
+            <p>{params.value}</p>
+        </Tooltip>
+       ),
+    },
     { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteIngredient},
 ];
 
 const instructionCols: GridColDef[] = [
-    { field: 'step', headerName: 'Step', width: 200, editable: true },
-    { field: 'description', headerName: 'Description', width: 800, editable: true },
+    { field: 'step', headerName: 'Step', width: 75, editable: true },
+    { field: 'description', headerName: 'Description', width: 925, editable: true, renderCell: (params: any) =>  (
+        <Tooltip title={params.value} arrow>
+            <p>{params.value}</p>
+        </Tooltip>
+       ),
+    },
     { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteInstruction},
 ];
 
 const noteCols: GridColDef[] = [
     { field: 'title', headerName: 'Title', width: 150, editable: true },
-    { field: 'body', headerName: 'Body', width: 350, editable: true },
+    { field: 'body', headerName: 'Body', width: 350, editable: true, renderCell: (params: any) =>  (
+        <Tooltip title={params.value} arrow>
+            <p>{params.value}</p>
+        </Tooltip>
+       ),
+    },
     { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteNote},
 ];
 
