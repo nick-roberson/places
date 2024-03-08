@@ -32,7 +32,7 @@ def get_comments(place_id: str) -> CommentsModel:
     Args:
         place_id (str): Place to get comments for
     """
-    logger.info(f"Getting comments for {place_id}")
+    print(f"Getting comments for {place_id}")
     comments = comments_manager.get(place_id=place_id)
     return comments
 
@@ -44,11 +44,11 @@ def add_comment(comment: CommentInsertModel) -> CommentModel:
     Args:
         comment (Comment): Comment to add to the place
     """
-    logger.info(f"Adding comment to {comment.place_id}")
+    print(f"Adding comment to {comment.place_id}")
 
     # Check comment and place_id
     if not comment.text or not comment.place_id:
-        logger.info("Please provide a comment and place_id")
+        print("Please provide a comment and place_id")
         raise HTTPException(
             status_code=400, detail="Please provide a comment and place_id"
         )
@@ -57,7 +57,7 @@ def add_comment(comment: CommentInsertModel) -> CommentModel:
     place = places_manager.get_place_by_id(id=comment.place_id)
     if not place:
         detail = f"Could not find place by id '{comment.place_id}'"
-        logger.info(detail)
+        print(detail)
         raise HTTPException(status_code=404, detail=detail)
 
     # Add comment to the database
@@ -80,6 +80,6 @@ def delete_comment(comment_id: str) -> None:
     Args:
         comment_id (str): Comment to delete
     """
-    logger.info(f"Deleting comment by id {comment_id}")
+    print(f"Deleting comment by id {comment_id}")
     comments_manager.drop_by_id(comment_id=comment_id)
     return None

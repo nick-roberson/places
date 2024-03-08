@@ -29,16 +29,16 @@ def add(
         name (str): Name of the restaurant
         location (str): Address of the restaurant
     """
-    logger.info(f"Adding {name} at {location}")
+    print(f"Adding {name} at {location}")
     # check for name and address
     if not name or not location:
-        logger.info("Please provide a name and address")
+        print("Please provide a name and address")
         raise HTTPException(status_code=400, detail="Please provide a name and address")
 
     # fetch new place
     new_place = get_restaurant_info(name=name, location=location)
     if not new_place:
-        logger.info(f"Could not find '{name}' at '{location}'")
+        print(f"Could not find '{name}' at '{location}'")
         raise HTTPException(
             status_code=404, detail=f"Could not find '{name}' at '{location}'"
         )
@@ -47,13 +47,11 @@ def add(
     existing = manager.get_place_by_place_id(new_place.place_id)
     if existing:
         print(existing)
-        logger.info(
-            f"Already contains '{existing.name}' at '{existing.formatted_address}'"
-        )
+        print(f"Already contains '{existing.name}' at '{existing.formatted_address}'")
         return manager.get_place_by_place_id(new_place.place_id)
 
     new_place = manager.insert(new_place)
-    logger.info(f"Inserted '{new_place}'")
+    print(f"Inserted '{new_place}'")
     return new_place
 
 
@@ -64,7 +62,7 @@ def add_many(places: List[PlaceInsertModel]) -> List[Place]:
     Args:
         places (List[Dict[str, str]]): List of restaurants to add
     """
-    logger.info(f"Adding {len(places)} places")
+    print(f"Adding {len(places)} places")
     new_places = []
     for place in places:
         try:

@@ -10,6 +10,7 @@
     "@mui/material": "^5.15.7",
     "@mui/x-charts": "^6.19.3",
     "@mui/x-data-grid": "^6.19.3",
+    "@mui/x-data-grid-generator": "^6.19.6",
     "@react-google-maps/api": "^2.19.2",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",

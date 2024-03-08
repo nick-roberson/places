@@ -35,13 +35,13 @@ def delete(place_id: str, name: str) -> Response:
 
     # Conditional delete by place_id or name
     if place_id:
-        logger.info(f"Deleting place {place_id} by place_id")
+        print(f"Deleting place {place_id} by place_id")
         manager.drop_by_place_id(place_id=place_id)
         return Response(
             status_code=200, content=f"Deleted place {place_id} by place_id"
         )
     elif name:
-        logger.info(f"Deleting place {name} by name")
+        print(f"Deleting place {name} by name")
         manager.drop_by_name(name=name)
         return Response(status_code=200, content=f"Deleted place {name} by name")
 
@@ -74,7 +74,7 @@ def delete_many(place_ids: List[str], names: List[str]) -> Response:
 
     # Conditional delete by place_ids or names
     if place_ids:
-        logger.info(f"Deleting places {place_ids} by place_ids")
+        print(f"Deleting places {place_ids} by place_ids")
         for place_id in place_ids:
             try:
                 manager.drop_by_place_id(place_id=place_id)
@@ -83,7 +83,7 @@ def delete_many(place_ids: List[str], names: List[str]) -> Response:
                 failed_deletes.append((place_id, e))
                 pass
     elif names:
-        logger.info(f"Deleting places {names} by names")
+        print(f"Deleting places {names} by names")
         for name in names:
             try:
                 manager.drop_by_place_id(name=name)

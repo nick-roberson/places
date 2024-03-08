@@ -1,3 +1,4 @@
+import logging
 from places.service.recipes.models import (
     RecipesModel,
     RecipeModel,
@@ -11,6 +12,8 @@ from typing import List
 
 # Singleton manager class
 _MANAGER_SINGLETON = None
+
+logger = logging.getLogger(__name__)
 
 
 def get_manager():
@@ -218,23 +221,27 @@ class RecipeManager:
             for note in recipe.notes:
                 if note.id is None:
                     note.id = str(uuid.uuid4())
+
             # check that all ingredients have an id
             for ingredient in recipe.ingredients:
                 if ingredient.id is None:
                     ingredient.id = str(uuid.uuid4())
+
             # check that all instructions have an id
             for instruction in recipe.instructions:
                 if instruction.id is None:
                     instruction.id = str(uuid.uuid4())
+
             # update the recipe in the collection
             self.collection.update_one({"id": recipe.id}, {"$set": recipe.dict()})
             return recipe
+
         except Exception as e:
             print(f"Error updating recipe {recipe.name}: {e}")
             return None
 
     def update_instruction(
-        self, recipe_id: str, instruction: Instruction
+        self, recipe: RecipeModel, instruction: Instruction
     ) -> Instruction:
         """Update an instruction in the database.
         Args:
@@ -242,46 +249,134 @@ class RecipeManager:
         """
         print(f"Updating instruction {instruction}")
         try:
-            # update the instruction in the recipe
-            self.collection.update_one(
-                {"id": recipe_id, "instructions.id": instruction.id},
-                {"$set": {"instructions.$": instruction.dict()}},
-            )
+            # update the instruction with a new id
+            if instruction.id is None:
+                instruction.id = str(uuid.uuid4())
+
+            # update the instruction in the collection
+            if instruction.id in [i.id for i in recipe.instructions]:
+                self.collection.update_one(
+                    {"id": recipe.id, "instructions.id": instruction.id},
+                    {"$set": {"instructions.$": instruction.dict()}},
+                    upsert=True,
+                )
+            # if the instruction does not exist, add it
+            else:
+                self.collection.update_one(
+                    {"id": recipe.id},
+                    {"$push": {"instructions": instruction.dict()}},
+                    upsert=True,
+                )
+
             return instruction
         except Exception as e:
             print(f"Error updating instruction {instruction}: {e}")
             return None
 
-    def update_ingredient(self, recipe_id: str, ingredient: Ingredient) -> Ingredient:
+    def update_instrucitons(
+        self, recipe: RecipeModel, instructions: List[Instruction]
+    ) -> List[Instruction]:
+        """Update a list of instructions in the database.
+        Args:
+            instructions (list[Instruction]): Instructions to update in the database
+        """
+        print(f"Updating {len(instructions)} instructions")
+        try:
+            for instruction in instructions:
+                self.update_instruction(recipe, instruction)
+            return instructions
+        except Exception as e:
+            print(f"Error updating {len(instructions)} instructions: {e}")
+            return None
+
+    def update_ingredient(
+        self, recipe: RecipeModel, ingredient: Ingredient
+    ) -> Ingredient:
         """Update an ingredient in the database.
         Args:
             ingredient (Ingredient): Ingredient to update in the database
         """
         print(f"Updating ingredient {ingredient}")
         try:
-            # update the ingredient in the recipe
-            self.collection.update_one(
-                {"id": recipe_id, "ingredients.id": ingredient.id},
-                {"$set": {"ingredients.$": ingredient.dict()}},
-            )
+            # update the ingredient with a new id
+            if ingredient.id is None:
+                ingredient.id = str(uuid.uuid4())
+
+            # update the ingredient in the collection
+            if ingredient.id in [i.id for i in recipe.ingredients]:
+                self.collection.update_one(
+                    {"id": recipe.id, "ingredients.id": ingredient.id},
+                    {"$set": {"ingredients.$": ingredient.dict()}},
+                    upsert=True,
+                )
+            # if the ingredient does not exist, add it
+            else:
+                self.collection.update_one(
+                    {"id": recipe.id},
+                    {"$push": {"ingredients": ingredient.dict()}},
+                    upsert=True,
+                )
             return ingredient
         except Exception as e:
             print(f"Error updating ingredient {ingredient}: {e}")
             return None
 
-    def update_note(self, recipe_id: str, note: Note) -> Note:
+    def update_ingredients(
+        self, recipe: RecipeModel, ingredients: List[Ingredient]
+    ) -> List[Ingredient]:
+        """Update a list of ingredients in the database.
+        Args:
+            ingredients (list[Ingredient]): Ingredients to update in the database
+        """
+        print(f"Updating {len(ingredients)} ingredients")
+        try:
+            for ingredient in ingredients:
+                self.update_ingredient(recipe, ingredient)
+            return ingredients
+        except Exception as e:
+            print(f"Error updating {len(ingredients)} ingredients: {e}")
+            return None
+
+    def update_note(self, recipe: RecipeModel, note: Note) -> Note:
         """Update a note in the database.
         Args:
             note (Note): Note to update in the database
         """
         print(f"Updating note {note}")
         try:
-            # update the note in the recipe
-            self.collection.update_one(
-                {"id": recipe_id, "notes.id": note.id},
-                {"$set": {"notes.$": note.dict()}},
-            )
+            # update the note with a new id
+            if note.id is None:
+                note.id = str(uuid.uuid4())
+
+            # update the note in the collection
+            if note.id in [n.id for n in recipe.notes]:
+                self.collection.update_one(
+                    {"id": recipe.id, "notes.id": note.id},
+                    {"$set": {"notes.$": note.dict()}},
+                    upsert=True,
+                )
+            # if the note does not exist, add it
+            else:
+                self.collection.update_one(
+                    {"id": recipe.id},
+                    {"$push": {"notes": note.dict()}},
+                    upsert=True,
+                )
             return note
         except Exception as e:
             print(f"Error updating note {note}: {e}")
+            return None
+
+    def update_notes(self, recipe: RecipeModel, notes: List[Note]) -> List[Note]:
+        """Update a list of notes in the database.
+        Args:
+            notes (list[Note]): Notes to update in the database
+        """
+        print(f"Updating {len(notes)} notes")
+        try:
+            for note in notes:
+                self.update_note(recipe, note)
+            return notes
+        except Exception as e:
+            print(f"Error updating {len(notes)} notes: {e}")
             return None

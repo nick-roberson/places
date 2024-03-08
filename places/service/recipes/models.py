@@ -14,35 +14,9 @@ class Ingredient(BaseModel):
     measurement: str
     preparation: Optional[str] = None
 
-    @validator("id")
-    def ensure_unique_id(cls, v):
-        if v == "" or v is None:
-            return str(uuid.uuid4())
-        return v
-
-    @validator("name")
-    def name_must_not_be_blank(cls, v):
-        if v == "":
-            raise ValueError("Name cannot be blank")
-        return v
-
-    @validator("quantity")
-    def quantity_must_not_be_blank(cls, v):
-        if v == "":
-            raise ValueError("Quantity cannot be blank")
-        return v
-
-    @validator("measurement")
-    def measurement_must_not_be_blank(cls, v):
-        if v == "":
-            raise ValueError("Measurement cannot be blank")
-        return v
-
-    @validator("preparation")
-    def preparation_must_not_be_blank(cls, v):
-        if v == "":
-            raise ValueError("Preparation cannot be blank")
-        return v
+    # allow extra to be passed in
+    class Config:
+        extra = "allow"
 
 
 class Instruction(BaseModel):
@@ -53,23 +27,16 @@ class Instruction(BaseModel):
     step: int
     description: str
 
-    @validator("id")
-    def ensure_unique_id(cls, v):
-        if v == "" or v is None:
-            return str(uuid.uuid4())
-        return v
-
     @validator("step")
-    def step_must_be_positive(cls, v):
-        if v <= 0:
-            raise ValueError("Step must be a positive integer")
+    def ensure_step_is_positive(cls, v):
+        v = int(v)
+        if v < 1:
+            raise ValueError("Step must be greater than 0")
         return v
 
-    @validator("description")
-    def description_must_not_be_blank(cls, v):
-        if v == "":
-            raise ValueError("Description cannot be blank")
-        return v
+    # allow extra to be passed in
+    class Config:
+        extra = "allow"
 
 
 class Note(BaseModel):
@@ -80,23 +47,9 @@ class Note(BaseModel):
     title: str
     body: str
 
-    @validator("id")
-    def ensure_unique_id(cls, v):
-        if v == "" or v is None:
-            return str(uuid.uuid4())
-        return v
-
-    @validator("title")
-    def title_must_not_be_blank(cls, v):
-        if v == "":
-            raise ValueError("Title cannot be blank")
-        return v
-
-    @validator("body")
-    def body_must_not_be_blank(cls, v):
-        if v == "":
-            raise ValueError("Body cannot be blank")
-        return v
+    # allow extra to be passed in
+    class Config:
+        extra = "allow"
 
 
 class RecipeModel(BaseModel):
@@ -111,24 +64,6 @@ class RecipeModel(BaseModel):
     ingredients: List[Ingredient] = []
     instructions: List[Instruction] = []
     notes: List[Note] = []
-
-    @validator("id")
-    def ensure_unique_id(cls, v):
-        if v == "" or v is None:
-            return str(uuid.uuid4())
-        return v
-
-    @validator("name")
-    def name_must_not_be_blank(cls, v):
-        if v == "":
-            raise ValueError("Name cannot be blank")
-        return v
-
-    @validator("description")
-    def description_must_not_be_blank(cls, v):
-        if v == "":
-            raise ValueError("Description cannot be blank")
-        return v
 
 
 class RecipesModel(BaseModel):

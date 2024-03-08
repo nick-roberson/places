@@ -25,7 +25,7 @@ def get_all() -> RecipesModel:
     Args:
         recipe (RecipeModel): Recipe to add to the database
     """
-    logger.info(f"Getting all recipes")
+    print(f"Getting all recipes")
     return recipes_manager.get_all()
 
 
@@ -36,7 +36,7 @@ def get(recipe_id: str) -> RecipeModel:
     Args:
         recipe_id (str): Recipe id to get from the database
     """
-    logger.info(f"Getting recipe {recipe_id}")
+    print(f"Getting recipe {recipe_id}")
     return recipes_manager.get(recipe_id=recipe_id)
 
 
@@ -47,5 +47,5 @@ def get_by_name(name: str) -> RecipesModel:
     Args:
         recipe_id (str): Recipe id to get from the database
     """
-    logger.info(f"Getting recipe {name}")
+    print(f"Getting recipe {name}")
     return recipes_manager.get_by_name(name=name)

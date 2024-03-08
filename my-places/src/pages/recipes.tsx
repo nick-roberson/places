@@ -1,5 +1,5 @@
 // Simple home page
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // Third Party
 import Input from '@mui/joy/Input';
@@ -8,9 +8,6 @@ import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
@@ -29,11 +26,92 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { Configuration } from '../api';
 import { DefaultApi } from '../api/apis';
 import { RecipeModel } from '../api';
-import { Ingredient } from '../api';
-import { Instruction } from '../api';
-import { Note } from '../api';
+import { Ingredient, IngredientFromJSON, IngredientToJSON} from '../api';
+import { Instruction, InstructionFromJSON, InstructionToJSON } from '../api';
+import { Note, NoteFromJSON, NoteToJSON } from '../api';
 import { Divider, IconButton } from '@mui/material';
 
+
+const getAPIClient = () => {
+    const configuration = new Configuration({
+        basePath: "http://localhost:8000",
+    });
+    const api = new DefaultApi(configuration);
+    return api;
+}
+   
+
+const renderDeleteIngredient = (params: any) => {
+    // Render the delete Icon in the table
+    return (
+        <strong>
+            <IconButton edge="end" aria-label="delete">
+                <DeleteIcon
+                    onClick={() => {
+                        const api = getAPIClient();
+                        try {
+                            const body = { recipeId: params.row.recipeId, ingredientId: params.row.id }
+                            api.deleteIngredientIngredientDeleteDelete(body).then((response) => {
+                                console.log('Deleted ingredient', response);
+                            });
+                        } catch (error) {
+                            console.error('Error deleting ingredient', error);
+                        }
+                    }
+                }
+                />
+            </IconButton>
+        </strong>
+    )
+}
+
+const renderDeleteInstruction = (params: any) => {
+    // Render the delete Icon in the table
+    return (
+        <strong>
+            <IconButton edge="end" aria-label="delete">
+                <DeleteIcon
+                    onClick={() => {
+                        const api = getAPIClient();
+                        try {
+                            const body = { recipeId: params.row.recipeId, instructionId: params.row.id }
+                            api.deleteInstructionInstructionDeleteDelete(body).then((response) => {
+                                console.log('Deleted instruction', response);
+                            });
+                        } catch (error) {
+                            console.error('Error deleting instruction', error);
+                        }
+                    }
+                }
+                />
+            </IconButton>
+        </strong>
+    )
+}
+
+const renderDeleteNote = (params: any) => {
+    // Render the delete Icon in the table
+    return (
+        <strong>
+            <IconButton edge="end" aria-label="delete">
+                <DeleteIcon
+                    onClick={() => {
+                        const api = getAPIClient();
+                        try {
+                            const body = { recipeId: params.row.recipeId, noteId: params.row.id }
+                            api.deleteNoteNoteDeleteDelete(body).then((response) => {
+                                console.log('Deleted note', response);
+                            });
+                        } catch (error) {
+                            console.error('Error deleting note', error);
+                        }
+                    }
+                }
+                />
+            </IconButton>
+        </strong>
+    )
+}
 
 const PlusIcon = createSvgIcon(
     // credit: plus icon from https://heroicons.com/
@@ -51,114 +129,29 @@ const PlusIcon = createSvgIcon(
 
 // DataGrid columns for ingredients, instructions, and notes
 const ingredientCols: GridColDef[] = [
-    { field: 'name', headerName: 'Name', width: 120 },
-    { field: 'quantity', headerName: 'Quantity', width: 120 },
-    { field: 'measurement', headerName: 'Measurement', width: 120 },
-    { field: 'preparation', headerName: 'Preparation', width: 1000 },
+    { field: 'name', headerName: 'Name', width: 200, editable: true },
+    { field: 'quantity', headerName: 'Quantity', width: 150, editable: true },
+    { field: 'measurement', headerName: 'Measurement', width: 150, editable: true },
+    { field: 'preparation', headerName: 'Preparation', width: 500, editable: true },
+    { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteIngredient},
 ];
 
 const instructionCols: GridColDef[] = [
-    { field: 'step', headerName: 'Step', width: 50 },
-    { field: 'description', headerName: 'Description', width: 1000 },
+    { field: 'step', headerName: 'Step', width: 200, editable: true },
+    { field: 'description', headerName: 'Description', width: 800, editable: true },
+    { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteInstruction},
 ];
 
 const noteCols: GridColDef[] = [
-    { field: 'title', headerName: 'Title', width: 200 },
-    { field: 'body', headerName: 'Body', width: 1000 },
+    { field: 'title', headerName: 'Title', width: 200, editable: true },
+    { field: 'body', headerName: 'Body', width: 800, editable: true },
+    { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteNote},
 ];
 
 // Function to take in apiClient and return all reicpes 
 const getRecipes = async (apiClient: DefaultApi) => {
     const recipes = await apiClient.getAllRecipesAllGet();
     return recipes.recipes;
-}
-
-const addNote = async (apiClient: DefaultApi, recipe: RecipeModel) => {
-    // if the recipe does not have an id, throw an error
-    if (!recipe.id) {
-        throw new Error("Recipe does not have an id");
-    }
-
-    // get the note title and body
-    const title = document.getElementById("new-note-title") as HTMLInputElement;
-    const body = document.getElementById("new-note-body") as HTMLInputElement;
-    if (!title || !body) {
-        throw new Error("Could not find the note title or body");
-    }
-
-    // create the note
-    const note = {
-        title: title.value,
-        body: body.value,
-    };
-
-    // add the note to the recipe
-    const response = await apiClient.addNoteNoteAddPost({
-        recipeId: recipe.id,
-        note: note,
-    });
-
-    return response;
-}
-
-const addInstruction = async (apiClient: DefaultApi, recipe: RecipeModel) => {
-    // if the recipe does not have an id, throw an error
-    if (!recipe.id) {
-        throw new Error("Recipe does not have an id");
-    }
-
-    // get the instruction step and description
-    const step = document.getElementById("new-instruction-step") as HTMLInputElement;
-    const description = document.getElementById("new-instruction-description") as HTMLInputElement;
-    if (!step || !description) {
-        throw new Error("Could not find the instruction step or description");
-    }
-
-    // create the instruction
-    const instruction = {
-        step: step.value,
-        description: description.value,
-    };
-
-    // add the instruction to the recipe
-    const response = await apiClient.addInstructionInstructionAddPost({
-        recipeId: recipe.id,
-        instruction: instruction,
-    });
-
-    return response;
-}
-
-const addIngredient = async (apiClient: DefaultApi, recipe: RecipeModel) => {
-    // if the recipe does not have an id, throw an error
-    if (!recipe.id) {
-        throw new Error("Recipe does not have an id");
-    }
-
-    // get the ingredient name, quantity, measurement, and preparation
-    const name = document.getElementById("new-ingredient-name") as HTMLInputElement;
-    const quantity = document.getElementById("new-ingredient-quantity") as HTMLInputElement;
-    const measurement = document.getElementById("new-ingredient-measurement") as HTMLInputElement;
-    const preparation = document.getElementById("new-ingredient-preparation") as HTMLInputElement;
-    if (!name || !quantity || !measurement || !preparation) {
-        throw new Error("Could not find the ingredient name, quantity, measurement, or preparation");
-    }
-
-    // create the ingredient
-    const ingredient = {
-        name: name.value,
-        quantity: quantity.value,
-        measurement: measurement.value,
-        preparation: preparation.value,
-    };
-
-    // add the ingredient to the recipe
-    const response = await apiClient.addIngredientIngredientAddPost({
-        recipeId: recipe.id,
-        ingredient: ingredient,
-    });
-
-    return response;
 }
 
 const deleteRecipe = async (apiClient: DefaultApi, recipe: RecipeModel) => {
@@ -171,200 +164,122 @@ const deleteRecipe = async (apiClient: DefaultApi, recipe: RecipeModel) => {
     return response;
 }
 
-const displayRecipe = (apiClient: DefaultApi, recipe: RecipeModel) => {
 
-    // Ingredient DataGrid
-    const ingredientRows = recipe.ingredients?.map((ingredient: Ingredient) => {
+// Function to create rows for the ingredient, instruction, and note DataGrids
+const createIngredientRowsFromRecipe = (recipe: RecipeModel) => {
+    return recipe.ingredients?.map((ingredient: Ingredient) => {
         return {
             id: ingredient.id,
+            recipeId: recipe.id,
             name: ingredient.name,
             quantity: ingredient.quantity,
             measurement: ingredient.measurement,
             preparation: ingredient.preparation,
         };
     });
+}
 
-    // Instructions DataGrid
-    const instructionRows = recipe.instructions?.map((instruction: Instruction) => {
+const createInstructionRowsFromRecipe = (recipe: RecipeModel) => {
+    return recipe.instructions?.map((instruction: Instruction) => {
         return {
             id: instruction.id,
+            recipeId: recipe.id,
             step: instruction.step,
             description: instruction.description,
         };
     });
+}
 
-    // Notes DataGrid
-    const noteRows = recipe.notes?.map((note: Note) => {
+const createNoteRowsFromRecipe = (recipe: RecipeModel) => {
+    return recipe.notes?.map((note: Note) => {
         return {
             id: note.id,
+            recipeId: recipe.id,
             title: note.title,
             body: note.body,
         };
     });
+}
 
-    return (
-        <div>
+const MutateIngredientRowCallback = () => {
+    return React.useCallback(
+      (recipe: RecipeModel, ingredient: Ingredient) =>
+        new Promise<Ingredient>((resolve, reject) => {
+          setTimeout(() => {
+            console.log("updating ingredient", ingredient)
+            const apiClient = getAPIClient();
+            apiClient.updateIngredientIngredientUpdatePut({recipeId: recipe.id, ingredient: ingredient});
+            resolve({ ...ingredient });
+          }, 200);
+        }),
+      [],
+    );
+};
 
-            <Typography variant="h6" gutterBottom>Name: {recipe.name}</Typography>
-            <p> <strong>Description: </strong> {recipe.description} </p>
-            <p> <strong>Source: </strong> {recipe.source?.toString()} </p>
-
-            <Divider> <h3> Ingredients </h3> </Divider>
-
-            {/* Display the ingredients  as a list */}
-            {
-                recipe.ingredients ? (
-                    <Grid>
-
-                        <Grid container spacing={2}  m={.5}>
-                            <Grid xs={2} m={.25}><Input id="new-ingredient-name" placeholder="Name"/></Grid>
-                            <Grid xs={2} m={.25}><Input id="new-ingredient-quantity" placeholder="Quantity" /></Grid>
-                            <Grid xs={2} m={.25}><Input id="new-ingredient-measurement" placeholder="Measurement" /></Grid>
-                            <Grid xs={3} m={.25}><Input id="new-ingredient-preparation" placeholder="Preparation" /></Grid>
-                            <Grid xs={2} m={.25}>
-                                <Button 
-                                    variant="contained"
-                                    color="primary"
-                                    sx={{ marginLeft: "auto" }}
-                                    onClick={() => addIngredient(apiClient, recipe)}>
-                                        Add Ingredient
-                                </Button>
-                            </Grid>
-                        </Grid>
-
-                        <DataGrid
-                            rows={ingredientRows}
-                            columns={ingredientCols}
-                            density="compact"
-                            initialState={
-                                {
-                                    pagination: {
-                                        paginationModel: { page: 0, pageSize: 10 },
-                                    },
-                                }
-                            }
-                            pageSizeOptions={[10, 20]}
-                            slots={{ toolbar: GridToolbar }}
-                        />
-                    </Grid>
-                ) : "No ingredients yet."
-            }
-
-            <Divider> <h3> Instructions </h3> </Divider>
-
-            {/* Display the instructions as a list */}
-            {
-                recipe.instructions ? (
-                <Grid>
-                    <Grid container spacing={1} m={.5}>
-                        <Grid xs={3} m={.5}><Input id="new-instruction-step" placeholder="Step"/></Grid>
-                        <Grid xs={6} m={.5}><Input id="new-instruction-description" placeholder="Description" /></Grid>
-                        <Grid xs={2} m={.5}>
-                            <Button 
-                                variant="contained"
-                                color="primary"
-                                sx={{ marginLeft: "auto" }}
-                                onClick={() => addInstruction(apiClient, recipe)}>
-                                    Add Instruction
-                            </Button>
-                        </Grid>
-                    </Grid>
-                
-                    <Accordion>
-                        <AccordionDetails>
-                            <DataGrid
-                                rows={instructionRows}
-                                columns={instructionCols}
-                                density="compact"
-                                initialState={
-                                    {
-                                        pagination: {
-                                            paginationModel: { page: 0, pageSize: 10 },
-                                        },
-                                    }
-                                }
-                                pageSizeOptions={[10, 20]}
-                                slots={{ toolbar: GridToolbar }}
-                            />
-                        </AccordionDetails>
-                    </Accordion>
-                </Grid>
-                ) : "No instructions yet."
-            }
-
-            <Divider> <h3> Notes </h3> </Divider>
-
-            {/* Display the notes as a list */}
-            {
-                recipe.notes ? (
-                <Grid>
-                    <Grid container spacing={1} m={.5}>
-                        <Grid xs={3} m={.5}><Input id="new-note-title" placeholder="Title"/></Grid>
-                        <Grid xs={6} m={.5}><Input id="new-note-body" placeholder="Body" /></Grid>
-                        <Grid xs={2} m={.5}>
-                            <Button 
-                                variant="contained"
-                                color="primary"
-                                sx={{ marginLeft: "auto" }}
-                                onClick={() => addNote(apiClient, recipe)}>
-                                    Add Note
-                            </Button>
-                        </Grid>
-                    </Grid>
-
-                    <Accordion>
-                        <AccordionDetails>
-                            <DataGrid
-                                rows={noteRows}
-                                columns={noteCols}
-                                density="compact"
-                                initialState={
-                                    {
-                                        pagination: {
-                                            paginationModel: { page: 0, pageSize: 10 },
-                                        },
-                                    }
-                                }
-                                pageSizeOptions={[10, 20]}
-                                slots={{ toolbar: GridToolbar }}
-                            />
-                        </AccordionDetails>
-                    </Accordion>
-                </Grid>
-                ) : "No notes yet"
-            }
-
-
-        </div>
+const MutateInstructionRowCallback = () => {
+    return React.useCallback(
+      (recipe: RecipeModel, instruction: Instruction) =>
+        new Promise<Instruction>((resolve, reject) => {
+          setTimeout(() => {
+            console.log("updating instruction", instruction)
+            const apiClient = getAPIClient();
+            apiClient.updateInstructionInstructionUpdatePut({recipeId: recipe.id, instruction: instruction});
+            resolve({ ...instruction });
+          }, 200);
+        }),
+      [],
     );
 }
 
+const MutateNoteRowCallback = () => {
+    return React.useCallback(
+      (recipe: RecipeModel, note: Note) =>
+        new Promise<Note>((resolve, reject) => {
+          setTimeout(() => {
+            console.log("updating note", note)
+            const apiClient = getAPIClient();
+            apiClient.updateNoteNoteUpdatePut({recipeId: recipe.id, note: note});
+            resolve({ ...note });
+          }, 200);
+        }),
+      [],
+    );
+}
 
 export function MyRecipes() {
 
     // api client and recipes state
     const [apiClient, setApiClient] = React.useState<DefaultApi | null>(null);
     const [allRecipes, setAllRecipes] = React.useState<RecipeModel[] | null>(null);
+
+    // selected recipe state
     const [selectedRecipe, setSelectedRecipe] = React.useState<RecipeModel | null>(null);
+    const selectedRecipeRef = useRef(selectedRecipe);
+    const setSelectedRecipeState = (recipe: RecipeModel) => {
+        // set the current selected recipe and update the ref
+        setSelectedRecipe(recipe);
+        selectedRecipeRef.current = recipe;
+        // create the rows for the ingredient, instruction, and note DataGrids
+        setIngredientRows(createIngredientRowsFromRecipe(recipe));
+        setInstructionRows(createInstructionRowsFromRecipe(recipe));
+        setNoteRows(createNoteRowsFromRecipe(recipe));
+    }
 
     // Runs Once: Initialize your API client with the base URL
     useEffect(() => {
-        // create a new api client
-        const configuration = new Configuration({
-            basePath: "http://localhost:8000",
-        });
-        const api = new DefaultApi(configuration);
-
         // set the api client
-        setApiClient(api);
+        const apiClient = getAPIClient();
+        setApiClient(apiClient);
 
-        // load the recipes 
-        getRecipes(api).then((recipes) => {
+        // get all recipes and set the current one to the first one
+        getRecipes(apiClient).then((recipes) => {
             setAllRecipes(recipes);
-            // set the selected recipe to the first recipe
-            setSelectedRecipe(recipes[0]);
+            if (recipes.length > 0) {
+                setSelectedRecipeState(recipes[0]);
+            } else {
+                setSelectedRecipe(null);
+            }
         });
-
     }, []);
 
     // Function to refresh the recipes
@@ -374,13 +289,17 @@ export function MyRecipes() {
         }
         const recipes = await getRecipes(apiClient);
         setAllRecipes(recipes);
+        if (recipes.length > 0) {
+            setSelectedRecipeState(recipes[0]);
+        } else {
+            setSelectedRecipe(null);
+        }
     }
 
     // Dialog state
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
     const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
-
     const handleDialogCreate = async () => {
         // Create the new recipe
         if (!apiClient) {
@@ -394,8 +313,6 @@ export function MyRecipes() {
         // Close 
         handleDialogClose();
     }
-    
-    // Simply close the dialog
     const handleDialogClose = () => {
       setOpen(false);
     };
@@ -405,6 +322,230 @@ export function MyRecipes() {
     const [newRecipeDescription, setNewRecipeDescription] = React.useState("");
     const [newRecipeSource, setNewRecipeSource] = React.useState("");
 
+    // Create rows for the ingredient, instruction, and note DataGrids
+    const [ingredientRows, setIngredientRows] = React.useState([]);
+    const [instructionRows, setInstructionRows] = React.useState([]);
+    const [noteRows, setNoteRows] = React.useState([]);
+
+    // Create function to add a row to the Ingredients DataGrid
+    const addIngredientRow = async () => {
+        if (!selectedRecipe) {
+            throw new Error("No API client or selected recipe");
+        }
+        const new_ingredient = IngredientFromJSON({
+            id: Math.floor(Math.random() * 1000000).toString(),
+            name: "",
+            quantity: "",
+            measurement: "",
+            preparation: "",
+        });
+        selectedRecipe.ingredients?.push(new_ingredient);
+        setSelectedRecipeState(selectedRecipe);
+    }
+
+    const addInstructionRow = async () => {
+        if (!selectedRecipe) {
+            throw new Error("No API client or selected recipe");
+        }
+        const new_instruction = InstructionFromJSON({
+            id: Math.floor(Math.random() * 1000000).toString(),
+            step: "",
+            description: "",
+        });
+        selectedRecipe.instructions?.push(new_instruction);
+        setSelectedRecipeState(selectedRecipe);
+    }
+
+    const addNoteRow = async () => {
+        if (!selectedRecipe) {
+            throw new Error("No API client or selected recipe");
+        }
+        const new_note = NoteFromJSON({
+            id: Math.floor(Math.random() * 1000000).toString(),
+            title: "",
+            body: "",
+        });
+        selectedRecipe.notes?.push(new_note);
+        setSelectedRecipeState(selectedRecipe);
+    }
+
+    const saveInstructionRows = async () => {
+        if (!selectedRecipe) {
+            throw new Error("No API client or selected recipe");
+        }
+        if (!apiClient) {
+            throw new Error("No API client");
+        }
+        console.log(selectedRecipe.instructions)
+        const response = await apiClient.updateInstructionsInstructionUpdateManyPut({
+            recipeId: selectedRecipe.id,
+            body: selectedRecipe.instructions,
+        });
+        setSelectedRecipeState(selectedRecipe);
+    }
+
+    const saveIngredientRows = async () => {
+        if (!selectedRecipe) {
+            throw new Error("No API client or selected recipe");
+        }
+        if (!apiClient) {
+            throw new Error("No API client");
+        }
+        console.log(ingredientRows)
+        console.log(selectedRecipe.ingredients)
+        const ingredients_list = selectedRecipe.ingredients?.map(IngredientToJSON);
+        console.log(ingredients_list)
+        const response = await apiClient.updateIngredientsIngredientUpdateManyPut({
+            recipeId: selectedRecipe.id,
+            body: ingredients_list,
+        });
+        setSelectedRecipeState(selectedRecipe);
+    }
+
+    const saveNoteRows = async () => {
+        if (!selectedRecipe) {
+            throw new Error("No API client or selected recipe");
+        }
+        if (!apiClient) {
+            throw new Error("No API client");
+        }
+        const response = await apiClient.updateNotesNoteUpdateManyPut({
+            recipeId: selectedRecipe.id,
+            body: selectedRecipe.notes,
+        });
+        setSelectedRecipeState(selectedRecipe);
+    }
+
+    // update when an ingredient row is changed
+    const mutateIngredientRow = MutateIngredientRowCallback();
+    const processIngredientRowUpdate = React.useCallback(
+        async (newRow: Ingredient, oldRow: Ingredient) => {
+            const recipe = selectedRecipeRef.current;
+            console.log(recipe)
+            if (!recipe) {
+                throw new Error("No selected recipe");
+            }
+            return await mutateIngredientRow(recipe, newRow);
+        },
+        [mutateIngredientRow],
+    );
+
+    // update when an instruction row is changed
+    const mutateInstructionRow = MutateInstructionRowCallback();
+    const processInstructionRowUpdate = React.useCallback(
+        async (newRow: Instruction, oldRow: Instruction) => {
+            const recipe = selectedRecipeRef.current;
+            if (!recipe) {
+                throw new Error("No selected recipe");
+            }
+            return await mutateInstructionRow(recipe, newRow);
+        },
+        [mutateInstructionRow],
+    );
+
+    // update when a note row is changed 
+    const mutateNoteRow = MutateNoteRowCallback();
+    const processNoteRowUpdate = React.useCallback(
+        async (newRow: Note, oldRow: Note) => {
+            const recipe = selectedRecipeRef.current;
+            if (!recipe) {
+                throw new Error("No selected recipe");
+            }
+            return await mutateNoteRow(recipe, newRow);
+        },
+        [mutateNoteRow],
+    );
+
+    const handleProcessRowUpdateError = React.useCallback((error: Error) => {
+        console.error(error);
+    }, []);
+    
+    
+    const displayRecipe = (recipe: RecipeModel) => {
+        return (
+            <div>
+                <Typography variant="h6" gutterBottom>Name: {recipe.name}</Typography>
+                <p> <strong>Description: </strong> {recipe.description} </p>
+                <p> <strong>Source: </strong> {recipe.source?.toString()} </p>
+
+                <Divider textAlign='left'><h3>Ingredients </h3></Divider>
+                {
+                    recipe.ingredients ? (
+                        <Grid>
+                            <Button color="primary" onClick={addIngredientRow}><strong>Add Ingredient</strong></Button>
+                            <DataGrid
+                                rows={ingredientRows}
+                                columns={ingredientCols}
+                                processRowUpdate={processIngredientRowUpdate}  
+                                onProcessRowUpdateError={handleProcessRowUpdateError}                 
+                                density="compact"
+                                // initialState={
+                                //     {
+                                //         pagination: {
+                                //             paginationModel: { page: 0, pageSize: 10 },
+                                //         },
+                                //     }
+                                // }
+                                // pageSizeOptions={[10, 20]}
+                                // slots={{ toolbar: GridToolbar }}
+                            />
+                        </Grid>
+                    ) : "No ingredients yet."
+                }
+    
+                <Divider textAlign='left'><h3>Instructions</h3></Divider>
+                {
+                    recipe.instructions ? (
+                        <Grid>
+                            <Button color="primary" onClick={addInstructionRow}><strong>Add Instruction</strong></Button>
+                            <DataGrid
+                                rows={instructionRows}
+                                columns={instructionCols}
+                                density="compact"
+                                processRowUpdate={processInstructionRowUpdate}
+                                onProcessRowUpdateError={handleProcessRowUpdateError}
+                                // initialState={
+                                //     {
+                                //         pagination: {
+                                //             paginationModel: { page: 0, pageSize: 10 },
+                                //         },
+                                //     }
+                                // }
+                                // pageSizeOptions={[10, 20]}
+                                // slots={{ toolbar: GridToolbar }}
+                            />
+                        </Grid>
+                        ) : "No instructions yet."
+                }
+    
+                <Divider textAlign='left'> <h3> Notes </h3> </Divider>
+                {
+                    recipe.notes ? (
+                        <Grid>
+                            <Button color="primary" onClick={addNoteRow}><strong>Add Note</strong></Button>
+                            <DataGrid
+                                rows={noteRows}
+                                columns={noteCols}
+                                density="compact"
+                                processRowUpdate={processNoteRowUpdate}
+                                onProcessRowUpdateError={handleProcessRowUpdateError}
+                                // initialState={
+                                //     {
+                                //         pagination: {
+                                //             paginationModel: { page: 0, pageSize: 10 },
+                                //         },
+                                //     }
+                                // }
+                                // pageSizeOptions={[10, 20]}
+                                // slots={{ toolbar: GridToolbar }}
+                            />
+                        </Grid>
+                        ) : "No notes yet"
+                }
+            </div>
+        );
+    }
+    
     return (
         <div>
             <Grid container spacing={2}>
@@ -462,7 +603,7 @@ export function MyRecipes() {
                                     <ListItemText 
                                         primary={recipe.name}
                                         onClick={() => {
-                                            setSelectedRecipe(recipe)
+                                            setSelectedRecipeState(recipe)
                                         }}
                                     />
                                     
@@ -484,7 +625,7 @@ export function MyRecipes() {
                 {/* Display the recipe details on the right */}
                 <Grid xs={9} m={2}>
                     <Box>
-                        {apiClient && selectedRecipe ? displayRecipe(apiClient, selectedRecipe) : <Alert severity="error">No recipe selected</Alert>}
+                        {apiClient && selectedRecipe ? displayRecipe(selectedRecipe) : <Alert severity="error">No recipe selected</Alert>}
                     </Box>
                 </Grid>
 

@@ -34,16 +34,16 @@ def get_all(force: bool = True) -> List[Place]:
     if not force:
         cached_entry = places_cache.get_places("all")
         if cached_entry:
-            logger.info(f"Getting all places from cache")
+            print(f"Getting all places from cache")
             return cached_entry
 
     # If not in cache then get from manager directly
-    logger.info(f"Getting all places from DB")
+    print(f"Getting all places from DB")
     all_places = manager.get_all()
 
     # Update the cache as we go then
     if all_places:
-        logger.info(f"Updating all places in cache")
+        print(f"Updating all places in cache")
         places_cache.set_places("all", all_places)
 
     # Return
@@ -61,16 +61,16 @@ def get_one(name: str, exact: bool = False) -> Optional[Place]:
     # First check the cache
     cached_entry = places_cache.get_place(name)
     if cached_entry:
-        logger.info(f"Getting {name} from cache")
+        print(f"Getting {name} from cache")
         return cached_entry
 
     # If not in cache then get from manager
-    logger.info(f"Getting {name} from DB")
+    print(f"Getting {name} from DB")
     entry = manager.get(name=name, exact=exact)
 
     # Add to cache
     if entry:
-        logger.info(f"Updating {name} in cache")
+        print(f"Updating {name} in cache")
         places_cache.set_place(name, entry)
 
     # Return
@@ -101,18 +101,18 @@ def search(
     search_key = hash(str(search_params))
     cached_entry = places_cache.get_places(search_key)
     if cached_entry:
-        logger.info(f"Getting search results from cache")
+        print(f"Getting search results from cache")
         return cached_entry
 
     # If not in cache then get from manager
-    logger.info(f"Searching for {name} at {address} with min rating {min_rating}")
+    print(f"Searching for {name} at {address} with min rating {min_rating}")
     results = manager.search(
         name=name, address=address, min_rating=min_rating, exact=exact
     )
 
     # Add to cache
     if results:
-        logger.info(f"Updating search results in cache")
+        print(f"Updating search results in cache")
         places_cache.set_places(search_key, results)
 
     # Return

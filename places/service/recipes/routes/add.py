@@ -27,7 +27,7 @@ def add_recipe(recipe: RecipeModel) -> RecipeModel:
     Args:
         recipe (RecipeModel): Recipe to add to the database
     """
-    logger.info(f"Adding recipe {recipe.name}")
+    print(f"Adding recipe {recipe.name}")
     return recipes_manager.add_recipe(recipe=recipe)
 
 
@@ -38,7 +38,7 @@ def add_instruction(recipe_id: str, instruction: Instruction) -> Instruction:
     Args:
         instruction (Instruction): Instruction to add to the database
     """
-    logger.info(f"Adding instruction {instruction}")
+    print(f"Adding instruction {instruction}")
     return recipes_manager.add_instruction(recipe_id=recipe_id, instruction=instruction)
 
 
@@ -49,7 +49,7 @@ def add_ingredient(recipe_id: str, ingredient: Ingredient) -> Ingredient:
     Args:
         ingredient (Ingredient): Ingredient to add to the database
     """
-    logger.info(f"Adding ingredient {ingredient}")
+    print(f"Adding ingredient {ingredient}")
     return recipes_manager.add_ingredient(recipe_id=recipe_id, ingredient=ingredient)
 
 
@@ -60,5 +60,5 @@ def add_note(recipe_id: str, note: Note) -> Note:
     Args:
         note (Note): Note to add to the database
     """
-    logger.info(f"Adding note {note}")
+    print(f"Adding note {note}")
     return recipes_manager.add_note(recipe_id=recipe_id, note=note)
