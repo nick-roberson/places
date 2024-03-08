@@ -11,13 +11,6 @@ import Home from './pages/home';
 import Layout from './pages/layout';
 import NoPage from './pages/nopage';
 
-// Create a root and render the App component
-// root.render(
-//   <React.StrictMode>
-//     <App />
-//   </React.StrictMode>
-// );
-
 export default function HomePage() {
   return (
     <BrowserRouter>

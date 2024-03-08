@@ -98,3 +98,30 @@ $ cd my-places && npm install && npm run start
 ```
 
 You will be able to access the front end at `http://localhost:3000`
+
+# Use the API
+
+You can use the API by going to `http://localhost:8000/docs` and using the Swagger UI to interact with the API.
+
+# Using Chat GPT to Generate a Recipe
+
+You can use the chat-gpt to generate a recipe pasting in a screenshot of the recipe and saying "Can you convert this to match this JSON format?" 
+```
+{
+    "name": "Nick's Chicken Parm",
+    "description": "Chicken parm recipe.",
+    "ingredients": [
+        {
+            "name": "Chicken Thighs",
+            "quantity": "2",
+            "measurement": "lbs",
+        },
+    ],
+    "instructions": [
+        {
+            "step": 1,
+            "description": "New Description"
+        }
+    ]
+}
+```

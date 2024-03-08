@@ -146,6 +146,20 @@ class RecipeManager:
             print(f"Error inserting {recipe.name}: {e}")
             return None
 
+    def add_recipes(self, recipes: List[RecipeModel]) -> List[RecipeModel]:
+        """Insert a list of recipes into the database.
+        Args:
+            recipes (list[RecipeModel]): List of recipe models
+        """
+        print(f"Inserting {len(recipes)} recipes into {self.collection_name}")
+        try:
+            for recipe in recipes:
+                self.add_recipe(recipe)
+            return recipes
+        except Exception as e:
+            print(f"Error inserting {len(recipes)} recipes: {e}")
+            return None
+
     def add_instruction(self, recipe_id: str, instruction: Instruction) -> Instruction:
         """Adds a single instruction to a recipe.
 
@@ -164,6 +178,24 @@ class RecipeManager:
             return instruction
         except Exception as e:
             print(f"Error adding instruction to {recipe_id}: {e}")
+            return None
+
+    def add_instructions(
+        self, recipe_id: str, instructions: List[Instruction]
+    ) -> List[Instruction]:
+        """Adds a list of instructions to a recipe.
+
+        Args:
+            recipe_id (str): Recipe id
+            instructions (list[Instruction]): List of instruction models
+        """
+        print(f"Adding {len(instructions)} instructions to {recipe_id}")
+        try:
+            for instruction in instructions:
+                self.add_instruction(recipe_id, instruction)
+            return instructions
+        except Exception as e:
+            print(f"Error adding {len(instructions)} instructions to {recipe_id}: {e}")
             return None
 
     def add_ingredient(self, recipe_id: str, ingredient: Ingredient) -> Ingredient:
@@ -186,6 +218,24 @@ class RecipeManager:
             print(f"Error adding ingredient to {recipe_id}: {e}")
             return None
 
+    def add_ingredients(
+        self, recipe_id: str, ingredients: List[Ingredient]
+    ) -> List[Ingredient]:
+        """Adds a list of ingredients to a recipe.
+
+        Args:
+            recipe_id (str): Recipe id
+            ingredients (list[Ingredient]): List of ingredient models
+        """
+        print(f"Adding {len(ingredients)} ingredients to {recipe_id}")
+        try:
+            for ingredient in ingredients:
+                self.add_ingredient(recipe_id, ingredient)
+            return ingredients
+        except Exception as e:
+            print(f"Error adding {len(ingredients)} ingredients to {recipe_id}: {e}")
+            return None
+
     def add_note(self, recipe_id: str, note: Note) -> Note:
         """Adds a single note to a recipe.
 
@@ -204,6 +254,22 @@ class RecipeManager:
             return note
         except Exception as e:
             print(f"Error adding note to {recipe_id}: {e}")
+            return None
+
+    def add_notes(self, recipe_id: str, notes: List[Note]) -> List[Note]:
+        """Adds a list of notes to a recipe.
+
+        Args:
+            recipe_id (str): Recipe id
+            notes (list[Note]): List of note models
+        """
+        print(f"Adding {len(notes)} notes to {recipe_id}")
+        try:
+            for note in notes:
+                self.add_note(recipe_id, note)
+            return notes
+        except Exception as e:
+            print(f"Error adding {len(notes)} notes to {recipe_id}: {e}")
             return None
 
     ########################################################
