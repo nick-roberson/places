@@ -11,7 +11,7 @@ import Button from '@mui/material/Button';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import { DataGrid, GridToolbar, GridColDef} from '@mui/x-data-grid';
+import { DataGrid, GridToolbar, GridColDef } from '@mui/x-data-grid';
 import { createSvgIcon } from '@mui/material/utils';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
@@ -460,14 +460,15 @@ export function MyRecipes() {
                                         processRowUpdate={processIngredientRowUpdate}  
                                         onProcessRowUpdateError={handleProcessRowUpdateError}       
                                         density="compact"
+                                        hideFooter
                                         initialState={
                                             {
                                                 pagination: {
-                                                    paginationModel: { page: 0, pageSize: 10 },
+                                                    paginationModel: { page: 0, pageSize: 50 },
                                                 },
                                             }
                                         }
-                                        pageSizeOptions={[10, 20]}
+                                        pageSizeOptions={[10, 20, 50]}
                                         slots={{ toolbar: GridToolbar }}
                                     />
                                 </Grid>
@@ -486,14 +487,15 @@ export function MyRecipes() {
                                         density="compact"
                                         processRowUpdate={processNoteRowUpdate}
                                         onProcessRowUpdateError={handleProcessRowUpdateError}
+                                        hideFooter
                                         initialState={
                                             {
                                                 pagination: {
-                                                    paginationModel: { page: 0, pageSize: 10 },
+                                                    paginationModel: { page: 0, pageSize: 50 },
                                                 },
                                             }
                                         }
-                                        pageSizeOptions={[10, 20]}
+                                        pageSizeOptions={[10, 20, 50]}
                                         slots={{ toolbar: GridToolbar }}
                                     />
                                 </Grid>
@@ -514,14 +516,15 @@ export function MyRecipes() {
                                 density="compact"
                                 processRowUpdate={processInstructionRowUpdate}
                                 onProcessRowUpdateError={handleProcessRowUpdateError}
+                                hideFooter
                                 initialState={
                                     {
                                         pagination: {
-                                            paginationModel: { page: 0, pageSize: 10 },
+                                            paginationModel: { page: 0, pageSize: 50 },
                                         },
                                     }
                                 }
-                                pageSizeOptions={[10, 20]}
+                                pageSizeOptions={[10, 20, 50]}
                                 slots={{ toolbar: GridToolbar }}
                             />
                         </Grid>
