@@ -1,5 +1,5 @@
 // Simple home page
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 // Third Party
 import Input from '@mui/joy/Input';
@@ -121,9 +121,9 @@ const PlusIcon = createSvgIcon(
 
 // DataGrid columns for ingredients, instructions, and notes
 const ingredientCols: GridColDef[] = [
-    { field: 'name', headerName: 'Name', width: 150, editable: true },
+    { field: 'name', headerName: 'Name', width: 175, editable: true },
     { field: 'quantity', headerName: 'Qty', width: 75, editable: true },
-    { field: 'measurement', headerName: 'Unit', width: 100, editable: true },
+    { field: 'measurement', headerName: 'Unit', width: 125, editable: true },
     { field: 'preparation', headerName: 'Prep', width: 200, editable: true, renderCell: (params: any) =>  (
         <Tooltip title={params.value} arrow>
             <p>{params.value}</p>
@@ -155,30 +155,23 @@ const noteCols: GridColDef[] = [
     { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteNote},
 ];
 
-// Function to take in apiClient and return all reicpes 
+// Function to get all recipes for a user
 const getRecipes = async (apiClient: DefaultApi) => {
     const recipes = await apiClient.getAllRecipesAllGet();
     return recipes.recipes;
 }
 
+// Function to delete a recipe for a user
 const deleteRecipe = async (apiClient: DefaultApi, recipe: RecipeModel) => {
-    // if the recipe does not have an id, throw an error
-    if (!recipe.id) {
-        throw new Error("Recipe does not have an id");
-    }
-    // delete the recipe
     const response = await apiClient.deleteRecipeRecipesDeleteDelete({ recipeId: recipe.id });
     return response;
 }
-
 
 // Function to create rows for the ingredient, instruction, and note DataGrids
 const createIngredientRowsFromRecipe = (recipe: RecipeModel) => {
     return recipe.ingredients?.map((ingredient: Ingredient) => {
         return {
-            // recipe info
             recipeId: recipe.id,
-            // ingredient info
             id: ingredient.id,
             name: ingredient.name,
             quantity: ingredient.quantity,
@@ -187,20 +180,16 @@ const createIngredientRowsFromRecipe = (recipe: RecipeModel) => {
         };
     });
 }
-
 const createInstructionRowsFromRecipe = (recipe: RecipeModel) => {
     return recipe.instructions?.map((instruction: Instruction) => {
         return {
-            // recipe info
             recipeId: recipe.id,
-            // instruction info
             id: instruction.id,
             step: instruction.step,
             description: instruction.description,
         };
     });
 }
-
 const createNoteRowsFromRecipe = (recipe: RecipeModel) => {
     return recipe.notes?.map((note: Note) => {
         return {
@@ -214,6 +203,7 @@ const createNoteRowsFromRecipe = (recipe: RecipeModel) => {
     });
 }
 
+// Function to update a row for the ingredient, instruction, and note DataGrids
 const MutateIngredientRowCallback = () => {
     return React.useCallback(
       (recipeManager: RecipeManager, ingredient: Ingredient) =>
@@ -226,7 +216,6 @@ const MutateIngredientRowCallback = () => {
       [],
     );
 };
-
 const MutateInstructionRowCallback = () => {
     return React.useCallback(
       (recipeManager: RecipeManager, instruction: Instruction) =>
@@ -239,7 +228,6 @@ const MutateInstructionRowCallback = () => {
       [],
     );
 }
-
 const MutateNoteRowCallback = () => {
     return React.useCallback(
       (recipeManager: RecipeManager, note: Note) =>
@@ -292,7 +280,7 @@ export function MyRecipes() {
                 setCurrentRecipeManager(null);
             }
         });
-    }, []);
+    }, [apiClient]);
 
     // Re-initialze variables for all and selected recipe
     const refreshRecipes = async (apiClient: DefaultApi) => {
@@ -317,6 +305,7 @@ export function MyRecipes() {
             description: newRecipeDescription,
             source: newRecipeSource,
         } });
+        console.log('Created recipe', response);
         handleDialogClose();
     }
     const handleDialogClose = () => {
@@ -420,7 +409,7 @@ export function MyRecipes() {
         return () => {
             PrintRecipe({recipe: recipe});
         }
-    };
+    };        
     
     const displayRecipe = (recipeManager: RecipeManager) => {
         return (
@@ -433,23 +422,10 @@ export function MyRecipes() {
                         <Button color="primary" variant="contained" onClick={handleRecipePrint(recipeManager.recipe)}><strong>Print / Save</strong></Button>
                     </Grid>
                 </Grid>
-                <p> 
-                    {/* Display description*/}
-                    <strong>Description: </strong> 
-                    <p>{recipeManager.recipe.description} </p>
-                </p>
-                <p> 
-                    {/* Display source*/}
-                    <strong>Source: </strong> {
-                        recipeManager.recipe.source && recipeManager.recipe.source.toString().startsWith("http") ?
-                        <p><a href={recipeManager.recipe.source.toString()} target="_blank" rel="noreferrer">{recipeManager.recipe.source.toString()}</a></p> :
-                        <p>{recipeManager.recipe.source?.toString()}</p>
-                    }
-                </p>
 
-                <Divider textAlign='left'><h3>Ingredients + Notes </h3></Divider>
-                <Grid container spacing={1} xs={12}>
+                <Grid container spacing={2}>
                     <Grid xs={6}>
+                        <Divider textAlign='left'><h3>Ingredients</h3></Divider>
                         <Button color="primary" onClick={addIngredientRow}><strong>Add Ingredient</strong></Button>
                         {
                             recipeManager.recipe.ingredients && recipeManager.recipe.ingredients?.length > 0 ? (
@@ -477,30 +453,51 @@ export function MyRecipes() {
                     </Grid>
 
                     <Grid xs={6}>
-                        <Button color="primary" onClick={addNoteRow}><strong>Add Note</strong></Button>
-                        {
-                            recipeManager.recipe.notes && recipeManager.recipe.notes?.length > 0 ? (
-                                <Grid>
-                                    <DataGrid
-                                        rows={noteRows}
-                                        columns={noteCols}
-                                        density="compact"
-                                        processRowUpdate={processNoteRowUpdate}
-                                        onProcessRowUpdateError={handleProcessRowUpdateError}
-                                        hideFooter
-                                        initialState={
-                                            {
-                                                pagination: {
-                                                    paginationModel: { page: 0, pageSize: 50 },
-                                                },
+                        <Divider textAlign='left'><h3>Information</h3></Divider>
+                        {/* Display name*/}
+                        <p>
+                            <strong>Name: </strong> {recipeManager.recipe.name}
+                        </p>
+                        {/* Display description*/}
+                        <p> 
+                            <strong>Description: </strong> 
+                            <p>{recipeManager.recipe.description} </p>
+                        </p>
+                        {/* Display source*/}
+                        <p>
+                            <strong>Source: </strong> {
+                                recipeManager.recipe.source && recipeManager.recipe.source.toString().startsWith("http") ?
+                                <p><a href={recipeManager.recipe.source.toString()} target="_blank" rel="noreferrer">{recipeManager.recipe.source.toString()}</a></p> :
+                                <p>{recipeManager.recipe.source?.toString()}</p>
+                            }
+                        </p>
+                        <Divider textAlign='left'><h3>Notes</h3></Divider>
+                        <Grid xs={6}>
+                            <Button color="primary" onClick={addNoteRow}><strong>Add Note</strong></Button>
+                            {
+                                recipeManager.recipe.notes && recipeManager.recipe.notes?.length > 0 ? (
+                                    <Grid>
+                                        <DataGrid
+                                            rows={noteRows}
+                                            columns={noteCols}
+                                            density="compact"
+                                            processRowUpdate={processNoteRowUpdate}
+                                            onProcessRowUpdateError={handleProcessRowUpdateError}
+                                            hideFooter
+                                            initialState={
+                                                {
+                                                    pagination: {
+                                                        paginationModel: { page: 0, pageSize: 50 },
+                                                    },
+                                                }
                                             }
-                                        }
-                                        pageSizeOptions={[10, 20, 50]}
-                                        slots={{ toolbar: GridToolbar }}
-                                    />
-                                </Grid>
-                                ) : <div><br></br><p>No notes yet. Add one to get started.</p></div>
-                        }
+                                            pageSizeOptions={[10, 20, 50]}
+                                            slots={{ toolbar: GridToolbar }}
+                                        />
+                                    </Grid>
+                                    ) : <div><br></br><p>No notes yet. Add one to get started.</p></div>
+                            }
+                        </Grid>
                     </Grid>
                 </Grid>
     
@@ -558,28 +555,31 @@ export function MyRecipes() {
                             {/* Dialog for adding a new recipe */}
                             <Dialog
                                 fullScreen={fullScreen}
+                                maxWidth="md"
                                 open={open}
                                 onClose={handleDialogClose}
                                 aria-labelledby="responsive-dialog-title"
                             >
-                                <DialogTitle id="responsive-dialog-title">
-                                    {"Add new recipe!"}
-                                </DialogTitle>
-
-                                <DialogContent>
-                                    <Input id="new-recipe-name" placeholder="Name" onChange={(e) => setNewRecipeName(e.target.value)}/>
-                                    <Input id="new-recipe-description" placeholder="Description" onChange={(e) => setNewRecipeDescription(e.target.value)}/>
-                                    <Input id="new-recipe-source" placeholder="Source" onChange={(e) => setNewRecipeSource(e.target.value)}/>
-                                </DialogContent>
-
-                                <DialogActions>
-                                    <Button autoFocus onClick={handleDialogClose}>
-                                        Close
-                                    </Button>
-                                    <Button onClick={handleDialogCreate} autoFocus>
-                                        Create
-                                    </Button>
-                                </DialogActions>
+                                <Box sx={{ textAlign: 'center' }} m={4}>
+                                    <DialogTitle id="responsive-dialog-title">
+                                        {"Add new recipe!"}
+                                    </DialogTitle>
+                                    <DialogContent>
+                                        <Input id="new-recipe-name" placeholder="Name" onChange={(e) => setNewRecipeName(e.target.value)}/>
+                                        <br></br>
+                                        <Input id="new-recipe-description" placeholder="Description" onChange={(e) => setNewRecipeDescription(e.target.value)}/>
+                                        <br></br>
+                                        <Input id="new-recipe-source" placeholder="Source" onChange={(e) => setNewRecipeSource(e.target.value)}/>
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button autoFocus onClick={handleDialogClose}>
+                                            Close
+                                        </Button>
+                                        <Button onClick={handleDialogCreate} autoFocus>
+                                            Create
+                                        </Button>
+                                    </DialogActions>
+                                </Box>
                             </Dialog>
 
                         </Stack>

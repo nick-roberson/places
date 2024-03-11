@@ -190,7 +190,6 @@ const MyPlaces = () => {
     // Selected row in the table
     const [selectedRow, setSelectedRow] = useState<Place | null>(null);
     const [loadedComments, setLoadedComments] = useState<CommentsModel>({comments: []});
-    const [message, setMessage] = useState<string>('');
 
     // Create state for new comments and add comment function
     const [newComment, setNewComment] = useState<string>('');

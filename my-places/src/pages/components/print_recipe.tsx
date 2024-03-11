@@ -1,5 +1,5 @@
 // Import the components
-import { RecipeModel, Ingredient, Note, Instruction } from "../../api";
+import { RecipeModel } from "../../api";
 
 // Define row formats
 const ingredient_row_format = '<li>{0} {1} {2}</li>';

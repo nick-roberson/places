@@ -27,9 +27,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { DataGrid, GridToolbar, GridColDef, GridEventListener } from '@mui/x-data-grid';
 
 // My imports
-import { Configuration } from '../api';
 import { DefaultApi } from '../api/apis';
-import { Place, PlaceFromJSONTyped} from '../api/models/Place';
+import { Place } from '../api/models/Place';
 import { CommentsModel } from '../api/models/CommentsModel';
 import getAPIClient from './components/api_client';
 
@@ -170,7 +169,6 @@ const MyPlaces = () => {
     // Selected row in the table
     const [selectedRow, setSelectedRow] = useState<Place | null>(null);
     const [loadedComments, setLoadedComments] = useState<CommentsModel>({comments: []});
-    const [message, setMessage] = useState<string>('');
 
     // Create state for new comments and add comment function
     const [newComment, setNewComment] = useState<string>('');
