@@ -31,15 +31,17 @@ import { Configuration } from '../api';
 import { DefaultApi } from '../api/apis';
 import { Place, PlaceFromJSONTyped} from '../api/models/Place';
 import { CommentsModel } from '../api/models/CommentsModel';
+import getAPIClient from './components/api_client';
 
 const renderSearchIcon = (params: any) => {
     // Render the search Icon in the table
+    let place = params.row
     return (
         <IconButton edge="end" aria-label="search">
             <SearchIcon
                 onClick={() => {
-                    console.log('Searching for', params.row.name)
-                    window.open(params.row.reservation_url, '_blank');
+                    console.log('Searching for', place.name)
+                    window.open(place.reservationUrl, '_blank');
                 }
                 }
             />
@@ -48,24 +50,18 @@ const renderSearchIcon = (params: any) => {
 }
 
 const renderDeleteIcon = (params: any) => {
+    let place = params.row
     // Render the delete Icon in the table
     return (
         <strong>
             <IconButton edge="end" aria-label="delete">
                 <DeleteIcon
                     onClick={() => {
-                        console.log('Deleting', params.row.name)
-
-                        // Init Client 
-                        const configuration = new Configuration({
-                            basePath: "http://localhost:8000",
-                        });
-                        const api = new DefaultApi(configuration);
-
-                        // Delete the place
+                        console.log('Deleting', place.name)
+                        const apiClient = getAPIClient();
                         try {
-                            const body = { placeId: '', name: params.row.name }
-                            api.deleteDeletePost(body).then((response) => {
+                            const body = { placeId: '', name: place.name }
+                            apiClient.deleteDeletePost(body).then((response) => {
                                 console.log('Deleted place', response);
                             });
                         } catch (error) {
@@ -118,16 +114,9 @@ function renderCommentsCards(comments: CommentsModel | null) {
                                 <DeleteIcon 
                                     onClick={() => {
                                         console.log('Deleting comment', comment.comment_id)
-
-                                        // Init Client 
-                                        const configuration = new Configuration({
-                                            basePath: "http://localhost:8000",
-                                        });
-                                        const api = new DefaultApi(configuration);
-
-                                        // Delete the comment
+                                        const apiClient = getAPIClient();
                                         try {
-                                            api.deleteCommentCommentsDeletePost({commentId: comment.comment_id}).then((response) => {
+                                            apiClient.deleteCommentCommentsDeletePost({commentId: comment.comment_id}).then((response) => {
                                                 console.log('Deleted comment', response);
                                             });
                                         } catch (error) {
@@ -146,12 +135,8 @@ function renderCommentsCards(comments: CommentsModel | null) {
     )
 };
 
-const renderSelectedPlace = (selectedRow: Place | null) => {
-    console.log('Calling renderSelectedPlace on: ', selectedRow)
-    if (!selectedRow) {
-        return <div>No Place Selected</div>
-    }
-    const place = PlaceFromJSONTyped(selectedRow, false);
+const renderSelectedPlace = (place: Place) => {
+    console.log('Calling renderSelectedPlace on: ', place)
     return (
         <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
             <ListItem>
@@ -288,28 +273,28 @@ const MyPlaces = () => {
             setRows(places);
             return;
         }
-
-        // Else filter the rows
         console.log('Updating search', search)
         let trimmed_search = search.trim().toLowerCase();
 
         // Set rows equal to filtered rows
         setRows(rows.filter((row) =>
             (
-                row.name !== null &&
-                row.name.toLowerCase().includes(trimmed_search)
+                (
+                    row.name !== null &&
+                    row.name.toLowerCase().includes(trimmed_search)
+                )
+                ||
+                (
+                    row.formattedAddress !== null &&
+                    row.formattedAddress.toLowerCase().includes(trimmed_search)
+                )
             )
         ));
     };
 
     // Initialize your API client with the base URL
     useEffect(() => {
-        // Init Client 
-        const configuration = new Configuration({
-            basePath: "http://localhost:8000",
-        });
-        const api = new DefaultApi(configuration);
-        setApiClient(api);
+        setApiClient(getAPIClient());
     }, []); // Run this effect only once
 
     const refreshPlaces = (force: boolean) => {
@@ -331,12 +316,11 @@ const MyPlaces = () => {
             setColumns([
                 // Add fields for basic information
                 { field: 'name', headerName: 'Name', width: 250},
-                { field: 'business_status', headerName: 'Status', width: 150 },
-                { field: 'formatted_address', headerName: 'Address', width: 400 },
+                { field: 'businessStatus', headerName: 'Status', width: 150 },
+                { field: 'formattedAddress', headerName: 'Address', width: 400 },
                 { field: 'rating', headerName: 'Avg Rating', width: 100 },
-                { field: 'user_ratings_total', headerName: 'Total Ratings', width: 100 },
-                { field: 'price_level', headerName: 'Price', width: 100 },
-
+                { field: 'userRatingsTotal', headerName: 'Total Ratings', width: 100 },
+                { field: 'priceLevel', headerName: 'Price', width: 100 },
                 // Add field for link our to google reservations
                 { field: 'reservation_url', headerName: 'Search', width: 100, renderCell: renderSearchIcon },
                 // Add field for delete button
