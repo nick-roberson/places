@@ -7,8 +7,11 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 
 from places.service.comments.manager import get_manager as get_comments_manager
-from places.service.comments.models import (CommentInsertModel, CommentModel,
-                                            CommentsModel)
+from places.service.comments.models import (
+    CommentInsertModel,
+    CommentModel,
+    CommentsModel,
+)
 from places.service.places.manager import get_manager as get_places_manager
 
 # Constants

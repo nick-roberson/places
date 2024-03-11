@@ -31,6 +31,7 @@ import { DefaultApi } from '../api/apis';
 import { Place } from '../api/models/Place';
 import { CommentsModel } from '../api/models/CommentsModel';
 import getAPIClient from './components/api_client';
+import { TypeFormatFlags } from 'typescript';
 
 const renderSearchIcon = (params: any) => {
     // Render the search Icon in the table
@@ -135,7 +136,6 @@ function renderCommentsCards(comments: CommentsModel | null) {
 };
 
 const renderSelectedPlace = (place: Place) => {
-    console.log('Calling renderSelectedPlace on: ', place)
     return (
         <List sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
             <ListItem>
@@ -227,7 +227,7 @@ const MyPlaces = () => {
         try {
             apiClient.addAddPostRaw({ name: newPlaceName, location: newPlaceLocation }).then((response) => {
                 console.log('Added place', response);
-                refreshPlaces(true);
+                refreshPlaces(true, apiClient);
 
                 // Clear the input fields
                 setNewPlaceName('');
@@ -295,25 +295,25 @@ const MyPlaces = () => {
 
     // Initialize your API client with the base URL
     useEffect(() => {
-        setApiClient(getAPIClient());
-    }, []); // Run this effect only once
+        let apiClient = getAPIClient();
+        setApiClient(apiClient);
+        refreshPlaces(true, apiClient);
+    }, []); 
 
-    const refreshPlaces = (force: boolean) => {
-        // Wait until the API client is initialized
-        if (!apiClient) {
-            console.log('API client not initialized yet, not loading')
-            return;
-        }
-
+    // Function to refresh places
+    const refreshPlaces = (force: boolean, apiClient: DefaultApi) => {
         if (!force && places.length > 0) {
             return;
         }
-
         // Load all places from the API
         apiClient.getAllAllGet({force: true}).then((new_places: Array<Place>) => {
             console.log('Loading places from API', new_places);
+
+            // Set the places and rows
             setPlaces(new_places);
             setRows(new_places);
+
+            // Set the columns
             setColumns([
                 // Add fields for basic information
                 { field: 'name', headerName: 'Name', width: 250},
@@ -327,22 +327,13 @@ const MyPlaces = () => {
                 // Add field for delete button
                 { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteIcon },
             ]);
+
+            // Set the selected row to the first row
+            if (new_places.length > 0) {
+                setSelectedRow(new_places[0]);
+            }
         });
     };
-
-    // Load all places from API using function
-    const loadPlaces = () => {
-        // Wait until the API client is initialized
-        if (!apiClient) {
-            console.log('API client not initialized yet, not loading')
-            return;
-        }
-        if (places.length > 0) {
-            return;
-        }
-        refreshPlaces(false);
-    };
-    loadPlaces();
 
     return (
         <div>
@@ -420,39 +411,28 @@ const MyPlaces = () => {
                             slots={{ toolbar: GridToolbar }}
                         />
                     </Grid>
-                    
-                    <Grid xs={3}>
-
-                        <Divider textAlign="center">Information</Divider>
-
-                        {
-                            selectedRow ? 
-                                renderSelectedPlace(selectedRow) : 
-                                "None Selected"
+                        <Grid xs={3}>
+                        { selectedRow ?
+                            <div>
+                                <Divider textAlign="center">Information</Divider>
+                                { renderSelectedPlace(selectedRow) }
+                                <Divider textAlign="center" component="div" >Your comments</Divider>
+                                { renderCommentsCards(loadedComments) }
+                                <Divider textAlign="center">Add new comment</Divider>
+                                <div>
+                                    <Grid container spacing={2} m={2}>
+                                        <Grid xs={9}>
+                                            <Input placeholder="New Comment ..." onChange={(event) => setNewComment(event.target.value)} />
+                                        </Grid>
+                                        <Grid xs={3}>
+                                            <Button variant="contained" color="primary" onClick={() => addComment()}>Add</Button>
+                                        </Grid>
+                                    </Grid>
+                                </div>
+                            </div>
+                            : <Typography>Select a place to view information!</Typography>
                         }
-
-                        <Divider textAlign="center" component="div" >Your comments</Divider>
-
-                        {
-                            selectedRow ? 
-                                renderCommentsCards(loadedComments) :
-                                '...'
-                        }
-
-                        <Divider textAlign="center">Add new comment</Divider>
-
-                        <div>
-                            <Grid container spacing={2} m={2}>
-                                <Grid xs={9}>
-                                    <Input placeholder="New Comment ..." onChange={(event) => setNewComment(event.target.value)} />
-                                </Grid>
-                                <Grid xs={3}>
-                                    <Button variant="contained" color="primary" onClick={() => addComment()}>Add</Button>
-                                </Grid>
-                            </Grid>
-                        </div>
-
-                    </Grid>
+                        </Grid>
                 </Grid>
             </Box>
       </div>
