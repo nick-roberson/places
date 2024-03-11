@@ -11,13 +11,10 @@ Then open your browser and go to:
 import logging
 from typing import List, Optional
 
-# Third Party
 from fastapi import APIRouter
 
 from constants import GOOGLE_API_KEY
 from places.cache.cache import get_places_cache
-
-# Places Code
 from places.service.places.manager import get_manager
 from places.service.places.models import APIKey, Place
 

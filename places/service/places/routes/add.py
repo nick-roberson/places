@@ -3,12 +3,9 @@ import logging
 import os
 from typing import Dict, List
 
-# Third Party
 from fastapi import APIRouter, HTTPException
 
 from places.google.google import get_restaurant_info
-
-# Places Code
 from places.service.places.manager import get_manager
 from places.service.places.models import Place, PlaceInsertModel
 

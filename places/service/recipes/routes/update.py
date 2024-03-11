@@ -2,12 +2,11 @@
 import logging
 from typing import List
 
-# Third Party
 from fastapi import APIRouter
 
-# Places Code
 from places.service.recipes.manager import get_manager as get_recipes_manager
-from places.service.recipes.models import Ingredient, Instruction, Note, RecipeModel
+from places.service.recipes.models import (Ingredient, Instruction, Note,
+                                           RecipeModel)
 
 # Constants
 recipes_manager = get_recipes_manager()

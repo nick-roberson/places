@@ -1,10 +1,8 @@
-# Third Party
 import json
 from typing import Dict, List, Union
 
 import redis
 
-# Places Code
 from constants import REDIS_DB, REDIS_HOST, REDIS_PORT, REDIS_TTL_SECONDS
 from places.service.places.models import Place
 

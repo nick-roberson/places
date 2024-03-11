@@ -2,7 +2,6 @@ import sys
 
 import pymongo
 
-# Places Code
 from constants import MONGO_URI
 
 

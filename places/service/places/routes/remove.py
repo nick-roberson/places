@@ -3,10 +3,8 @@ import logging
 import os
 from typing import List
 
-# Third Party
 from fastapi import APIRouter, HTTPException, Response
 
-# Places Code
 from places.service.places.manager import get_manager
 
 # Constants

@@ -15,14 +15,13 @@ import os
 
 import uvicorn
 
-# Third Party
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 # Comments Routes
 from places.service.comments.routes.comments import router as comments_routes
 
-# Places Code
+
 from places.service.places.manager import PlacesManager
 
 # Places Routes

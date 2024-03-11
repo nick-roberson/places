@@ -103,7 +103,8 @@ You will be able to access the front end at `http://localhost:3000`
 
 To lint and format the code, you can run the following commands:
 ```bash
-$ poetry run black .
+$ poetry run black places
+$ poetry run isort places
 ```
 
 To lint and format the front end code, you can run the following commands:

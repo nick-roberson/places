@@ -1,10 +1,8 @@
 # Standard
 import logging
 
-# Third Party
 from fastapi import APIRouter
 
-# Places Code
 from places.service.recipes.manager import get_manager as get_recipes_manager
 from places.service.recipes.models import RecipeModel, RecipesModel
 
