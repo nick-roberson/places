@@ -161,6 +161,9 @@ const MyPlaces = () => {
     // Create a state to store the API client
     const [apiClient, setApiClient] = useState<DefaultApi | null>(null);
 
+    // Create a state to store the message
+    const [message, setMessage] = useState<string>('');
+
     // Create rows and columns for Data GridColDef
     const [places, setPlaces] = useState<Place[]>([]);
     const [rows, setRows] = useState<Place[]>([]);

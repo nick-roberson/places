@@ -1,10 +1,11 @@
 # Third Party
-import redis
 import json
-from typing import Dict, Union, List
+from typing import Dict, List, Union
+
+import redis
 
 # Places Code
-from constants import REDIS_HOST, REDIS_PORT, REDIS_DB, REDIS_TTL_SECONDS
+from constants import REDIS_DB, REDIS_HOST, REDIS_PORT, REDIS_TTL_SECONDS
 from places.service.places.models import Place
 
 redis_client = None

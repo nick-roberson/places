@@ -1,7 +1,8 @@
-from places.service.comments.models import CommentModel, CommentsModel
-from places.service.mongo_utils import get_client, get_collection
 import uuid
 from typing import List
+
+from places.service.comments.models import CommentModel, CommentsModel
+from places.service.mongo_utils import get_client, get_collection
 
 # Singleton manager class
 _MANAGER_SINGLETON = None

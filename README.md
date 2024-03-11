@@ -99,6 +99,21 @@ $ cd my-places && npm install && npm run start
 
 You will be able to access the front end at `http://localhost:3000`
 
+# Linting and Formatting 
+
+To lint and format the code, you can run the following commands:
+```bash
+$ poetry run black .
+```
+
+To lint and format the front end code, you can run the following commands:
+```bash
+$ cd my-places
+$ npx eslint src --fix 
+$ prettier --write "**/*.ts" --tab-width 4  
+```
+
+
 # Use the API
 
 You can use the API by going to `http://localhost:8000/docs` and using the Swagger UI to interact with the API.

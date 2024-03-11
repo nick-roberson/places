@@ -1,10 +1,12 @@
-import os
-import typer
 import json
+import os
 import sys
-import tabulate
 
-from places.google import seed as get_seed_data, get_restaurant_info
+import tabulate
+import typer
+
+from places.google import get_restaurant_info
+from places.google import seed as get_seed_data
 from places.service.places.manager import PlacesManager
 
 app = typer.Typer()

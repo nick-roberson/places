@@ -1,10 +1,11 @@
-import os
 import json
-import googlemaps
-
-from tqdm import tqdm
-from places.service.places.models import Place
+import os
 from typing import List, Union
+
+import googlemaps
+from tqdm import tqdm
+
+from places.service.places.models import Place
 
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 INITIAL_RESTAURANTS = "/Users/nicholas/Code/sandbox_mongo_db/data/initial_places.json"

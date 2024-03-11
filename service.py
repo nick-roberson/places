@@ -7,31 +7,33 @@ Then open your browser and go to:
     > http://localhost:8000/get/all
 """
 
+import argparse
+import logging
+
 # Standard Library
 import os
-import logging
+
 import uvicorn
-import argparse
 
 # Third Party
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
+
+# Comments Routes
+from places.service.comments.routes.comments import router as comments_routes
 
 # Places Code
 from places.service.places.manager import PlacesManager
 
 # Places Routes
 from places.service.places.routes.add import router as add_places_routes
-from places.service.places.routes.remove import router as delete_places_routes
 from places.service.places.routes.get import router as get_places_routes
-
-# Comments Routes
-from places.service.comments.routes.comments import router as comments_routes
+from places.service.places.routes.remove import router as delete_places_routes
 
 # Recipe Routes
 from places.service.recipes.routes.add import router as add_recipes_routes
-from places.service.recipes.routes.get import router as get_recipes_routes
 from places.service.recipes.routes.delete import router as delete_recipes_routes
+from places.service.recipes.routes.get import router as get_recipes_routes
 from places.service.recipes.routes.update import router as update_recipes_routes
 
 # Initialize FastAPI App

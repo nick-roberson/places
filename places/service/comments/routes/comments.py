@@ -1,21 +1,21 @@
 # Standard
+import datetime
 import logging
 import uuid
-import datetime
+from typing import List
 
 # Third Party
-from fastapi import APIRouter
-from fastapi import HTTPException
-from typing import List
+from fastapi import APIRouter, HTTPException
+
+from places.service.comments.manager import get_manager as get_comments_manager
+from places.service.comments.models import (
+    CommentInsertModel,
+    CommentModel,
+    CommentsModel,
+)
 
 # Places Code
 from places.service.places.manager import get_manager as get_places_manager
-from places.service.comments.manager import get_manager as get_comments_manager
-from places.service.comments.models import (
-    CommentModel,
-    CommentsModel,
-    CommentInsertModel,
-)
 
 # Constants
 places_manager = get_places_manager()

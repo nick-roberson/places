@@ -7,12 +7,7 @@ from fastapi import APIRouter
 
 # Places Code
 from places.service.recipes.manager import get_manager as get_recipes_manager
-from places.service.recipes.models import (
-    RecipeModel,
-    Instruction,
-    Ingredient,
-    Note,
-)
+from places.service.recipes.models import Ingredient, Instruction, Note, RecipeModel
 
 # Constants
 recipes_manager = get_recipes_manager()

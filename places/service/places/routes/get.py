@@ -9,16 +9,17 @@ Then open your browser and go to:
 
 # Standard Library
 import logging
+from typing import List, Optional
 
 # Third Party
 from fastapi import APIRouter
-from typing import List, Optional
+
+from constants import GOOGLE_API_KEY
+from places.cache.cache import get_places_cache
 
 # Places Code
 from places.service.places.manager import get_manager
-from places.service.places.models import Place, APIKey
-from places.cache.cache import get_places_cache
-from constants import GOOGLE_API_KEY
+from places.service.places.models import APIKey, Place
 
 places_cache = get_places_cache()
 manager = get_manager()

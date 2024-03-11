@@ -1,11 +1,10 @@
 # Standard
-import os
 import logging
+import os
+from typing import List
 
 # Third Party
-from fastapi import APIRouter
-from fastapi import HTTPException, Response
-from typing import List
+from fastapi import APIRouter, HTTPException, Response
 
 # Places Code
 from places.service.places.manager import get_manager

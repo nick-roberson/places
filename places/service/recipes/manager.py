@@ -1,14 +1,15 @@
 import logging
-from places.service.recipes.models import (
-    RecipesModel,
-    RecipeModel,
-    Instruction,
-    Ingredient,
-    Note,
-)
-from places.service.mongo_utils import get_client, get_collection
 import uuid
 from typing import List
+
+from places.service.mongo_utils import get_client, get_collection
+from places.service.recipes.models import (
+    Ingredient,
+    Instruction,
+    Note,
+    RecipeModel,
+    RecipesModel,
+)
 
 # Singleton manager class
 _MANAGER_SINGLETON = None

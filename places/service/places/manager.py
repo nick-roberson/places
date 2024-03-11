@@ -3,9 +3,10 @@ import uuid
 # Third Party
 from typing import List
 
+from places.service.mongo_utils import get_client, get_collection
+
 # Places Code
 from places.service.places.models import Place
-from places.service.mongo_utils import get_client, get_collection
 
 # Singleton manager class
 _MANAGER_SINGLETON = None

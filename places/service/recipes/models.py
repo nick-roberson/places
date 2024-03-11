@@ -1,7 +1,6 @@
-from pydantic import BaseModel
 from typing import List, Optional
-from pydantic import validator
-import uuid
+
+from pydantic import BaseModel, validator
 
 
 class Ingredient(BaseModel):

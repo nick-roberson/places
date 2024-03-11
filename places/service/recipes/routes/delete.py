@@ -7,7 +7,6 @@ from fastapi import APIRouter
 # Places Code
 from places.service.recipes.manager import get_manager as get_recipes_manager
 
-
 # Constants
 recipes_manager = get_recipes_manager()
 
