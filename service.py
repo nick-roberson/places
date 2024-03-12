@@ -27,7 +27,7 @@ from places.service.places.manager import PlacesManager
 # Places Routes
 from places.service.places.routes.add import router as add_places_routes
 from places.service.places.routes.get import router as get_places_routes
-from places.service.places.routes.remove import router as delete_places_routes
+from places.service.places.routes.delete import router as delete_places_routes
 
 # Recipe Routes
 from places.service.recipes.routes.add import router as add_recipes_routes

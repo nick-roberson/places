@@ -8,7 +8,7 @@ import Grid from '@mui/system/Unstable_Grid';
 import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import Button from '@mui/joy/Button';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -16,6 +16,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import Divider from '@mui/material/Divider';
 import ListItemText from '@mui/material/ListItemText';
+import Textarea from '@mui/joy/Textarea';
 
 // Icons
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -27,72 +28,25 @@ import SearchIcon from '@mui/icons-material/Search';
 import { DataGrid, GridToolbar, GridColDef, GridEventListener } from '@mui/x-data-grid';
 
 // My imports
+import PlacesManager from './components/places_manager';
 import { DefaultApi } from '../api/apis';
 import { Place } from '../api/models/Place';
 import { CommentsModel } from '../api/models/CommentsModel';
 import getAPIClient from './components/api_client';
-import { TypeFormatFlags } from 'typescript';
-
-const renderSearchIcon = (params: any) => {
-    // Render the search Icon in the table
-    let place = params.row
-    return (
-        <IconButton edge="end" aria-label="search">
-            <SearchIcon
-                onClick={() => {
-                    console.log('Searching for', place.name)
-                    window.open(place.reservationUrl, '_blank');
-                }
-                }
-            />
-        </IconButton>
-    )
-}
-
-const renderDeleteIcon = (params: any) => {
-    let place = params.row
-    // Render the delete Icon in the table
-    return (
-        <strong>
-            <IconButton edge="end" aria-label="delete">
-                <DeleteIcon
-                    onClick={() => {
-                        console.log('Deleting', place.name)
-                        const apiClient = getAPIClient();
-                        try {
-                            const body = { placeId: '', name: place.name }
-                            apiClient.deleteDeletePost(body).then((response) => {
-                                console.log('Deleted place', response);
-                            });
-                        } catch (error) {
-                            console.error('Error deleting place', error);
-                        }
-                    }
-                }
-                />
-            </IconButton>
-        </strong>
-    )
-}
 
 function renderCommentsCards(comments: CommentsModel | null) {
-    console.log('Calling renderCommentsCards on: ', comments)
-
     // check that place is not null
     if (!comments) {
         return <div>No Comments</div>
     }
-
     // check that comments are not null
     if (!comments.comments) {
         return <div>No Comments</div>
     }
-
     // shorten the created at date for all comments 
     comments.comments.forEach((comment: any) => {
         comment.created_at = comment.created_at.substring(0, 10);
     });
-
     // render the comments
     return (
         <div>
@@ -165,7 +119,7 @@ const MyPlaces = () => {
     const [message, setMessage] = useState<string>('');
 
     // Create rows and columns for Data GridColDef
-    const [places, setPlaces] = useState<Place[]>([]);
+    const [placesManager, setPlacesManager] = useState<PlacesManager>(new PlacesManager());
     const [rows, setRows] = useState<Place[]>([]);
     const [columns, setColumns] = useState<GridColDef[]>([]);
 
@@ -214,33 +168,53 @@ const MyPlaces = () => {
     };
 
     // vars and functions for adding new places
+    const [newPlaceProcessing, setNewPlaceProcessing] = useState<boolean>(false);
     const [accordionExpanded, setAccordionExpanded] = useState<boolean>(false);
     const [newPlaceName, setNewPlaceName] = useState<string>('');
     const [newPlaceLocation, setNewPlaceLocation] = useState<string>('');
-
-    const addPlace = () => {
+    async function addPlace() {
         console.log('Adding a new place', newPlaceName, newPlaceLocation);
-        if (!apiClient) {
-            console.log('API client not initialized yet, not adding');
-            return;
-        }
+        setNewPlaceProcessing(true);
         try {
-            apiClient.addAddPostRaw({ name: newPlaceName, location: newPlaceLocation }).then((response) => {
-                console.log('Added place', response);
-                refreshPlaces(true, apiClient);
-
-                // Clear the input fields
-                setNewPlaceName('');
-                setNewPlaceLocation('');
-
-                // Collapse the accordion
-                setAccordionExpanded(false);
+            placesManager.addPlace(newPlaceName, newPlaceLocation).then(() => {
+                setRows(placesManager.getPlaces());
             });
         } catch (error) {
-            console.error('Error adding place', error);
-            setMessage('Error adding place');
+            let err_str = 'Error adding place: ' + error;
+            console.error(err_str);
+            setMessage(err_str);
         }
+        setNewPlaceProcessing(false);
     };
+
+    // vars and function for adding palces in bulk
+    const [bulkAddProcessing, setBulkAddProcessing] = useState<boolean>(false);
+    const [bulkAccordionExpanded, setBulkAccordionExpanded] = useState<boolean>(false);
+    const [newPlaceBulk, setNewPlaceBulk] = useState<string>('');
+    async function addPlacesBulk() {
+        // Reads in text from newPlaceBulk and adds each line as a new place
+        // text is formatted in the following way:
+        // Name, Location
+        // ...
+        setBulkAddProcessing(true);
+        let places = newPlaceBulk.split('\n');
+        places.forEach((place: string) => {
+            let parts = place.split(',');
+            if (parts.length === 2) {
+                console.log('Adding place', parts[0].trim(), parts[1].trim());
+                try {
+                    placesManager.addPlace(parts[0].trim(), parts[1].trim()).then(() => {
+                        setRows(placesManager.getPlaces());
+                    });
+                } catch (error) {
+                    let err_str = 'Error adding place: ' + error;
+                    console.error(err_str);
+                    setMessage(err_str);
+                }
+            }
+        });
+        setBulkAddProcessing(false);
+    }
 
     const rowClickEvent: GridEventListener<'rowClick'> = (
       params, // GridRowParams
@@ -271,13 +245,11 @@ const MyPlaces = () => {
     const updateSearch = (search: string) => {
         // If we are not searching, show all rows
         if (search === '' || search === null) {
-            setRows(places);
+            setRows(placesManager.getPlaces());
             return;
         }
-        console.log('Updating search', search)
-        let trimmed_search = search.trim().toLowerCase();
-
         // Set rows equal to filtered rows
+        let trimmed_search = search.trim().toLowerCase();
         setRows(rows.filter((row) =>
             (
                 (
@@ -293,55 +265,87 @@ const MyPlaces = () => {
         ));
     };
 
+    const renderSearchIcon = (params: any) => {
+        // Render the search Icon in the table
+        let place = params.row
+        return (
+            <IconButton edge="end" aria-label="search">
+                <SearchIcon
+                    onClick={() => {
+                        console.log('Searching for', place.name)
+                        window.open(place.reservationUrl, '_blank');
+                    }
+                    }
+                />
+            </IconButton>
+        )
+    }
+
+    const renderDeleteIcon = (params: any) => {
+        let place = params.row
+        // Render the delete Icon in the table
+        return (
+            <strong>
+                <IconButton edge="end" aria-label="delete">
+                    <DeleteIcon
+                        onClick={() => {
+                            try {
+                                placesManager.removePlace(place).then(() => {
+                                    setRows(placesManager.getPlaces());
+                                });
+                            } catch (error) {
+                                console.error('Error deleting place', error);
+                            }
+                        }
+                    }
+                    />
+                </IconButton>
+            </strong>
+        )
+    }
+
+    const placesColumns: GridColDef[] = [
+        { field: 'name', headerName: 'Name', width: 250 },
+        { field: 'formattedAddress', headerName: 'Address', width: 400 },
+        { field: 'rating', headerName: 'Avg Rating', width: 100 },
+        { field: 'userRatingsTotal', headerName: 'Total Ratings', width: 100 },
+        { field: 'priceLevel', headerName: 'Price', width: 100 },
+        { field: 'reservationUrl', headerName: 'Search', width: 100, renderCell: renderSearchIcon },
+        { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteIcon },
+    ];
+
     // Initialize your API client with the base URL
     useEffect(() => {
+
+        // Get the API client
         let apiClient = getAPIClient();
         setApiClient(apiClient);
-        refreshPlaces(true, apiClient);
+
+        // Load the places
+        apiClient.getAllAllGet().then((places: Place[]) => {
+
+            // Set the places and columns
+            placesManager.setPlaces(places);
+            setRows(places);
+            setColumns(placesColumns);
+
+            // Set the selected row
+            let selectedRow = places[0];
+            setSelectedRow(selectedRow);
+            apiClient.getCommentsCommentsGetGet({placeId: selectedRow.placeId}).then((comments: CommentsModel) => {
+                setLoadedComments(comments);
+            });
+        });
     }, []); 
 
     // Function to refresh places
-    const refreshPlaces = (force: boolean, apiClient: DefaultApi) => {
-        if (!force && places.length > 0) {
-            return;
-        }
-        // Load all places from the API
-        apiClient.getAllAllGet({force: true}).then((new_places: Array<Place>) => {
-            console.log('Loading places from API', new_places);
-
-            // Set the places and rows
-            setPlaces(new_places);
-            setRows(new_places);
-
-            // Set the columns
-            setColumns([
-                // Add fields for basic information
-                { field: 'name', headerName: 'Name', width: 250},
-                { field: 'businessStatus', headerName: 'Status', width: 150 },
-                { field: 'formattedAddress', headerName: 'Address', width: 400 },
-                { field: 'rating', headerName: 'Avg Rating', width: 100 },
-                { field: 'userRatingsTotal', headerName: 'Total Ratings', width: 100 },
-                { field: 'priceLevel', headerName: 'Price', width: 100 },
-                // Add field for link our to google reservations
-                { field: 'reservation_url', headerName: 'Search', width: 100, renderCell: renderSearchIcon },
-                // Add field for delete button
-                { field: 'delete', headerName: 'Delete', width: 100, renderCell: renderDeleteIcon },
-            ]);
-
-            // Set the selected row to the first row
-            if (new_places.length > 0) {
-                setSelectedRow(new_places[0]);
-            }
-        });
-    };
-
     return (
         <div>
             <Box sx={{ flexGrow: 1 }}>
-                <Grid container spacing={2} m={2}>
+                <Grid container spacing={2} m={1}>
 
                     {/* Dialog for adding places */}
-                    <Grid xs={4}>
+                    <Grid xs={3}>
                         <Accordion
                             expanded={accordionExpanded}
                             onChange={(event, expanded) => setAccordionExpanded(expanded)}
@@ -349,38 +353,71 @@ const MyPlaces = () => {
                             <AccordionSummary
                                 expandIcon={<MenuIcon />}
                                 aria-controls="panel1a-content"
-                                id="panel1a-header"
                             >
-                                <Typography>Add a new place</Typography>
+                                <Typography>Add a Place</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
-                                <Grid container spacing={2} m={2}>
-                                    <Grid xs={12}>
-                                        Enter the name of the place you want to add!
+                                <Grid container spacing={2}>
+                                    <Grid xs={6}>
+                                        <Input placeholder="ex: Radio Kwara" onChange={(event) => setNewPlaceName(event.target.value)} />
                                     </Grid>
                                     <Grid xs={6}>
-                                        <Input placeholder="Type name ..." onChange={(event) => setNewPlaceName(event.target.value)} />
+                                        <Input placeholder="ex: Brooklyn, NY" onChange={(event) => setNewPlaceLocation(event.target.value)} />
                                     </Grid>
-                                    <Grid xs={6}>
-                                        <Input placeholder="Type location ..." onChange={(event) => setNewPlaceLocation(event.target.value)} />
-                                    </Grid>
-                                    <Grid xs={12}>
-                                        <Button variant="contained" color="primary" onClick={() => addPlace()}>Add Place </Button>
+                                    <Grid xs={10}>
+                                        {
+                                            newPlaceProcessing ?
+                                                <Button loading>Adding Place</Button>
+                                                : <Button color="primary" onClick={() => addPlace()}>Add Place</Button>
+                                        }
                                     </Grid>
                                 </Grid>
                             </AccordionDetails>
                         </Accordion>
                     </Grid>
 
+                    {/* Add a new place in bulk */}
+                    <Grid xs={3}>
+                        <Accordion
+                            expanded={bulkAccordionExpanded}
+                            onChange={(event, expanded) => setBulkAccordionExpanded(expanded)}
+                        >
+                            <AccordionSummary
+                                expandIcon={<MenuIcon />}
+                                aria-controls="panel1a-content"
+                                id="panel1a-header"
+                            >
+                                <Typography>Add in Bulk</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Grid container spacing={2}>
+                                    <Grid xs={12}>
+                                        <Textarea 
+                                            minRows={4} 
+                                            placeholder="ex: 'New Place, New Location'" 
+                                            onChange={(event) => setNewPlaceBulk(event.target.value)} 
+                                        />
+                                    </Grid>
+                                    <Grid xs={10}>
+                                        {
+                                            bulkAddProcessing ? 
+                                                <Button loading>Adding Places</Button>
+                                                : <Button color="primary" onClick={() => addPlacesBulk()}>Add Places</Button>
+                                        }
+                                    </Grid>
+                                </Grid>
+                            </AccordionDetails>
+                        </Accordion>
+                    </Grid>
                     {/* Display message */}
-                    <Grid xs={4}>
+                    <Grid xs={3}>
                         <Alert severity="info">
                             <strong>Selected Location:</strong> {selectedRow ? selectedRow.name : 'None'}
                         </Alert>
                     </Grid>
 
                     {/* Display message */}
-                    <Grid xs={4}>
+                    <Grid xs={3}>
                         <Alert severity="info">
                             <strong>API Status:</strong> {apiClient ? 'Connected' : 'Not connected'}
                         </Alert>
@@ -396,20 +433,25 @@ const MyPlaces = () => {
 
                     {/* DataGrid of all places pull from API */}
                     <Grid xs={9}>
-                        <DataGrid
-                            onRowClick={rowClickEvent}
-                            rows={rows}
-                            columns={columns}
-                            initialState={
-                                {
-                                    pagination: {
-                                        paginationModel: { page: 0, pageSize: 10 },
-                                    },
-                                }
-                            }
-                            pageSizeOptions={[10, 20]}
-                            slots={{ toolbar: GridToolbar }}
-                        />
+                        {
+                            rows.length > 0 ?
+                                <DataGrid
+                                    onRowClick={rowClickEvent}
+                                    rows={rows}
+                                    columns={columns}
+                                    density="compact"
+                                    initialState={
+                                        {
+                                            pagination: {
+                                                paginationModel: { page: 0, pageSize: 15 },
+                                            },
+                                        }
+                                    }
+                                    pageSizeOptions={[15, 30]}
+                                    slots={{ toolbar: GridToolbar }}
+                                />
+                                : <Typography>No places found</Typography>
+                        }
                     </Grid>
                         <Grid xs={3}>
                         { selectedRow ?
@@ -425,7 +467,7 @@ const MyPlaces = () => {
                                             <Input placeholder="New Comment ..." onChange={(event) => setNewComment(event.target.value)} />
                                         </Grid>
                                         <Grid xs={3}>
-                                            <Button variant="contained" color="primary" onClick={() => addComment()}>Add</Button>
+                                            <Button color="primary" onClick={() => addComment()}>Add</Button>
                                         </Grid>
                                     </Grid>
                                 </div>

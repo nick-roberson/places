@@ -13,7 +13,7 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-@router.post("/delete")
+@router.delete("/delete")
 def delete(place_id: str, name: str) -> Response:
     """Simple, delete single place."""
     # Raise errors if no place_id or name provided
@@ -21,13 +21,6 @@ def delete(place_id: str, name: str) -> Response:
         raise HTTPException(
             status_code=400,
             detail="Please provide a `place_id` or `name` to delete.",
-        )
-
-    # Raise error if both place_id and name provided
-    if place_id and name:
-        raise HTTPException(
-            status_code=400,
-            detail="Please provide only one of `place_id` or `name` to delete.",
         )
 
     # Conditional delete by place_id or name
@@ -49,7 +42,7 @@ def delete(place_id: str, name: str) -> Response:
     )
 
 
-@router.post("/delete/many")
+@router.delete("/delete/many")
 def delete_many(place_ids: List[str], names: List[str]) -> Response:
     """Simple, delete multiple places."""
     # Raise errors if no place_ids or names provided
@@ -57,13 +50,6 @@ def delete_many(place_ids: List[str], names: List[str]) -> Response:
         raise HTTPException(
             status_code=400,
             detail="Please provide `place_ids` or `names` to delete.",
-        )
-
-    # Raise error if both place_ids and names provided
-    if place_ids and names:
-        raise HTTPException(
-            status_code=400,
-            detail="Please provide only one of `place_ids` or `names` to delete.",
         )
 
     successful_deletes = []

@@ -1,6 +1,7 @@
 import json
 import os
 from typing import List, Union
+import uuid
 
 import googlemaps
 from tqdm import tqdm
@@ -68,4 +69,7 @@ def get_restaurant_info(name: str, location: str = None) -> Union[Place, None]:
 
     # return first result
     first = places_result["results"][0]
+
+    # update with new id and return
+    first["id"] = str(uuid.uuid4())
     return Place(**first)
